@@ -1,0 +1,83 @@
+/* ============================================================
+   MODEL · Modelo de negocio (planes)
+   ============================================================ */
+
+.plans {
+  margin-top: var(--space-12);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-5);
+}
+
+.plan {
+  display: grid;
+  gap: var(--space-4);
+  align-content: start;
+  padding: var(--space-8);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.plan__badge {
+  justify-self: start;
+  padding: 0.25rem 0.7rem;
+  border-radius: var(--radius-full);
+  background: var(--primary-soft-strong);
+  color: var(--primary-700);
+  font-size: var(--text-xs);
+  font-weight: 800;
+  letter-spacing: var(--tracking-wide);
+}
+
+[data-theme="dark"] .plan__badge { color: var(--primary-300); }
+
+.plan__name {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: var(--tracking-tight);
+}
+
+.plan__text {
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+  line-height: 1.65;
+}
+
+.plan .checklist li { font-size: var(--text-sm); }
+
+/* --- Plan premium (invertido) --- */
+.plan--premium {
+  background: linear-gradient(155deg, #14211f, #0a1a18 55%, #081512);
+  border-color: rgba(153, 246, 228, 0.16);
+  color: var(--ink-inverse);
+  box-shadow: var(--shadow-lg);
+}
+
+.plan--premium .plan__name { color: #fff; }
+.plan--premium .plan__text { color: rgba(233, 245, 242, 0.72); }
+
+.plan--premium .plan__badge {
+  background: rgba(251, 191, 36, 0.16);
+  color: var(--accent-300);
+}
+
+.plan--premium .checklist li { color: rgba(233, 245, 242, 0.78); }
+
+.plan--premium .checklist li::before { background-color: var(--primary-400); }
+
+.plan__note {
+  padding-top: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--ink-3);
+  line-height: 1.6;
+}
+
+.plan--premium .plan__note { color: rgba(233, 245, 242, 0.5); }
+
+@media (max-width: 48rem) {
+  .plans { grid-template-columns: minmax(0, 1fr); }
+}

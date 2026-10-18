@@ -1,0 +1,69 @@
+/* ============================================================
+   UTILITIES · Layout base y bloques reutilizables
+   ============================================================ */
+
+.container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--container-x);
+}
+
+.section {
+  padding-block: var(--section-y);
+  border-top: 1px solid var(--border);
+  position: relative;
+}
+
+.section--alt {
+  background: var(--bg-alt);
+}
+
+.section--tight {
+  padding-block: clamp(3rem, 6vw, 4.5rem);
+}
+
+/* --- Rejillas --- */
+.grid {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.grid--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+@media (max-width: 62rem) {
+  .grid--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid--3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 40rem) {
+  .grid--2,
+  .grid--3,
+  .grid--4 { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* --- Alineación --- */
+.text-center { text-align: center; }
+.mx-auto { margin-inline: auto; }
+
+.stack {
+  display: grid;
+  gap: var(--space-4);
+  justify-items: start;
+}
+
+.stack--center {
+  justify-items: center;
+  text-align: center;
+}
+
+/* --- Separación superior estándar entre cabecera y contenido --- */
+.head-gap {
+  margin-top: var(--space-12);
+}
+
+@media (max-width: 40rem) {
+  .head-gap { margin-top: var(--space-10); }
+}

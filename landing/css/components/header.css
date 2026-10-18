@@ -1,0 +1,188 @@
+/* ============================================================
+   HEADER · Cabecera fija, navegación y menú móvil
+   ============================================================ */
+
+.site-header {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 100;
+  height: var(--header-h);
+  background: transparent;
+  border-bottom: 1px solid transparent;
+  transition:
+    background-color var(--dur) var(--ease),
+    border-color var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease);
+}
+
+.site-header.is-scrolled {
+  background: var(--header-bg);
+  border-bottom-color: var(--border);
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: saturate(160%) blur(14px);
+  -webkit-backdrop-filter: saturate(160%) blur(14px);
+}
+
+.site-header__inner {
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+/* --- Marca --- */
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 800;
+  letter-spacing: var(--tracking-tight);
+  color: var(--ink);
+}
+
+.brand:hover { color: var(--ink); }
+
+.brand__mark {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radius-md);
+  background: linear-gradient(140deg, var(--primary-500), var(--primary-700));
+  color: #fff;
+  box-shadow: 0 8px 18px -8px rgba(13, 148, 136, 0.7);
+}
+
+.brand__name em {
+  font-style: normal;
+  color: var(--primary);
+}
+
+/* --- Navegación escritorio --- */
+.nav {
+  margin-inline: auto;
+}
+
+.nav__list {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.nav__link {
+  position: relative;
+  display: block;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--ink-2);
+  transition: color var(--dur-fast) var(--ease), background-color var(--dur-fast) var(--ease);
+}
+
+.nav__link:hover {
+  color: var(--ink);
+  background: var(--surface-2);
+}
+
+.nav__link.is-active {
+  color: var(--primary);
+}
+
+.nav__link.is-active::after {
+  content: "";
+  position: absolute;
+  left: var(--space-3);
+  right: var(--space-3);
+  bottom: 0.15rem;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--primary);
+}
+
+/* --- Acciones --- */
+.site-header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.theme-toggle {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink-2);
+  transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease), background-color var(--dur-fast) var(--ease);
+}
+
+.theme-toggle:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.theme-toggle .icon--moon { display: none; }
+
+[data-theme="dark"] .theme-toggle .icon--sun { display: none; }
+[data-theme="dark"] .theme-toggle .icon--moon { display: block; }
+
+/* --- Botón menú móvil --- */
+.menu-toggle {
+  display: none;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.menu-toggle .icon--close { display: none; }
+
+.menu-toggle[aria-expanded="true"] .icon--menu { display: none; }
+.menu-toggle[aria-expanded="true"] .icon--close { display: block; }
+
+/* --- Panel móvil --- */
+.mobile-nav {
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+}
+
+.mobile-nav[hidden] { display: none; }
+
+.mobile-nav__list {
+  display: grid;
+  gap: var(--space-1);
+  padding-block: var(--space-4) var(--space-5);
+}
+
+.mobile-nav__link {
+  display: block;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+.mobile-nav__link:hover,
+.mobile-nav__link.is-active {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.mobile-nav .btn { margin-bottom: var(--space-5); }
+
+/* --- Responsive --- */
+@media (max-width: 60rem) {
+  .nav,
+  .site-header__actions .btn { display: none; }
+
+  .menu-toggle { display: grid; }
+}

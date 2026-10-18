@@ -1,0 +1,98 @@
+/* ============================================================
+   CTA · Llamada a la acción y formulario
+   ============================================================ */
+
+.cta {
+  /* Fondo en variable para reutilizarlo en el estado slide */
+  --cta-bg:
+    radial-gradient(36rem 18rem at 50% 0%, var(--glow-1), transparent 65%),
+    var(--bg);
+
+  padding-block: var(--section-y);
+  border-top: 1px solid var(--border);
+  background: var(--cta-bg);
+}
+
+.cta__inner {
+  max-width: 40rem;
+  margin-inline: auto;
+  text-align: center;
+  display: grid;
+  gap: var(--space-4);
+  justify-items: center;
+}
+
+.cta__icon {
+  display: grid;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(140deg, var(--primary-500), var(--primary-700));
+  color: #fff;
+  box-shadow: 0 14px 30px -12px rgba(13, 148, 136, 0.65);
+}
+
+.cta__text {
+  font-size: var(--text-lg);
+  color: var(--ink-2);
+}
+
+.form {
+  margin-top: var(--space-4);
+  display: flex;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 26rem;
+}
+
+.form__input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.75rem 1.15rem;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: var(--text-sm);
+  transition: border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+}
+
+.form__input::placeholder { color: var(--ink-3); }
+
+.form__input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px var(--ring);
+}
+
+/* Aviso de confianza bajo el formulario */
+.cta__trust {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-5);
+  font-size: var(--text-sm);
+  color: var(--ink-3);
+}
+
+.cta__trust .icon { color: var(--primary); }
+
+.form__success {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.form__success[hidden] { display: none; }
+
+.form__success .icon { color: currentColor; }
+
+@media (max-width: 30rem) {
+  .form { flex-direction: column; }
+  .form .btn { width: 100%; }
+}

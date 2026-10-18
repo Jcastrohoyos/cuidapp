@@ -1,0 +1,59 @@
+/* ============================================================
+   PLATFORM · Sección "La plataforma"
+   El efecto scroll-driven lo aporta el módulo `slide.css`
+   (clase `slide` en la sección + `slide-stagger` en la lista).
+   ============================================================ */
+
+.platform__content {
+  position: relative;
+}
+
+.platform__inner {
+  display: grid;
+  gap: var(--space-6);
+}
+
+/* --- Requisitos --- */
+.requirements {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4) var(--space-6);
+}
+
+.requirement {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+  padding: var(--space-4) 0;
+  border-top: 1px solid var(--border);
+}
+
+.requirement__num {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--primary);
+  padding-top: 0.1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.requirement__text {
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+  line-height: 1.6;
+}
+
+.requirement__text strong {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.requirement--wide { grid-column: 1 / -1; }
+
+@media (max-width: 62rem) {
+  .requirements { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 40rem) {
+  .requirements { grid-template-columns: minmax(0, 1fr); }
+}
