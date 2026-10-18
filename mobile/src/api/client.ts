@@ -1,9 +1,11 @@
 /**
  * Cliente HTTP tipado para la API de Cuidapp.
  * Autenticación por Bearer token persistido de forma segura (SecureStore en
- * nativo, memoria en web).
+ * nativo, AsyncStorage/localStorage en web para que la sesión sobreviva a
+ * recargas y reinicios del navegador).
  */
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import * as Updates from 'expo-updates';
 import { Platform } from 'react-native';
@@ -63,8 +65,15 @@ export class ApiError extends Error {
   }
 }
 
-/** Almacén de token: SecureStore en nativo, memoria en web. */
-const memoriaWeb = new Map<string, string>();
+/**
+ * Almacén de token:
+ * - **Nativo:** SecureStore (cifrado en keychain/keystore).
+ * - **Web:** AsyncStorage (localStorage). SecureStore no existe en web
+ *   (plataformas android/iOS/tvOS según la doc de SDK 57), así que con un
+ *   Map en memoria la sesión se perdía en cada recarga. El token queda
+ *   legible para JS en el navegador — aceptable para el modo demo/mocks;
+ *   con backend real convendría una cookie httpOnly.
+ */
 const almacenNativo = {
   obtener: (clave: string) => SecureStore.getItemAsync(clave),
   guardar: (clave: string, valor: string) =>
@@ -77,13 +86,9 @@ const almacenNativo = {
 export const tokenStorage = Platform.select({
   native: almacenNativo,
   default: {
-    obtener: async (clave: string) => memoriaWeb.get(clave) ?? null,
-    guardar: async (clave: string, valor: string) => {
-      memoriaWeb.set(clave, valor);
-    },
-    borrar: async (clave: string) => {
-      memoriaWeb.delete(clave);
-    },
+    obtener: (clave: string) => AsyncStorage.getItem(clave),
+    guardar: (clave: string, valor: string) => AsyncStorage.setItem(clave, valor),
+    borrar: (clave: string) => AsyncStorage.removeItem(clave),
   },
 })!;
 
