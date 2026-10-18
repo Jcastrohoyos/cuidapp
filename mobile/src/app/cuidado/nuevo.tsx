@@ -316,7 +316,8 @@ export default function NuevoPerfilScreen() {
       });
 
       toast.exito('Perfil de cuidado guardado como borrador.');
-      router.back();
+      if (router.canGoBack()) router.back();
+      else router.replace('/');
     } catch {
       /* El error lo comunica el banner global (QueryClient). */
     }

@@ -24,7 +24,10 @@ export function ScreenHeader({ titulo, subtitulo, variante = 'atras', onAccion }
 
   const pulsar = () => {
     if (onAccion) onAccion();
-    else router.back();
+    // Recarga o enlace directo a esta ruta: no hay historia que recorrer
+    // (GO_BACK quedaría sin manejar y el usuario quedaría atrapado).
+    else if (router.canGoBack()) router.back();
+    else router.replace('/');
   };
 
   return (
