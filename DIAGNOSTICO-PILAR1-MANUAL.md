@@ -158,6 +158,7 @@
 
 - **La sesión no se restauraba tras recargar en web (bug real):** `SecureStore` no existe en web (doc SDK 57: solo android/iOS/tvOS), así que `tokenStorage` usaba un `Map` en memoria y cada recarga perdía el token → login obligatorio. La rama web ahora usa **AsyncStorage (localStorage)**; nativo sigue en SecureStore. Flujo validado: login → token en `localStorage` → recarga → "Hola, Ana" sin formulario; logout → token `null`; re-login correcto.
 - **Destello de login y pérdida de ruta profunda:** mientras `estado === 'cargando'` el guard pintaba el formulario de login un instante y el router redirigía `/perfil` → `/`. Ahora el `Stack` no se monta hasta salir de `cargando`: contenedor neutro y **la URL original se conserva** (recarga en `/perfil` → se queda en `/perfil`).
+- **Botón ‹/✕ sin historia previa (bug real, hallado en la verificación completa):** recargar o abrir un enlace directo a una ruta apilada (p. ej. `/cuenta`) dejaba al usuario **atrapado**: `router.back()` despacha `GO_BACK` sin ningún navegador que lo gestione (toast "The action 'GO_BACK' was not handled"). Ahora `ScreenHeader` comprueba `router.canGoBack()` y, si no hay historia, hace `router.replace('/')`; el mismo fallback en el tras-guardado de `cuidado/nuevo`. Validado: recarga en `/cuenta` → ✕ → Inicio autenticado, sin toast.
 
 ### Archivos tocados
 
