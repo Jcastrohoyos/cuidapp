@@ -121,8 +121,9 @@
   /* ------------------------------------------------------------
      6. Demo: pestañas y tareas de la rutina
      ------------------------------------------------------------ */
-  const tabs = $$(".app-tab");
-  const screens = $$(".app-screen");
+  // Pestañas del móvil de la demo principal (las del recorrido --j tienen su propia lógica).
+  const tabs = $$(".app-tab:not(.app-tab--j)");
+  const screens = $$(".demo__stage .app-screen");
 
   const activateScreen = (name) => {
     screens.forEach((screen) => {
@@ -181,6 +182,10 @@
   const journeyCounter = $("#journey-counter");
   const journeyPrev = $("#journey-prev");
   const journeyNext = $("#journey-next");
+  // Barra de pestañas del recorrido (Inicio · Buscar · Rutina · Perfil).
+  const journeyTabs = $$(".app-tab--j");
+  // Cada paso se asocia a la pestaña que se ilumina: 0 Inicio · 1 Buscar · 2 Rutina · 3 Perfil.
+  const TAB_POR_PASO = [0, 3, 0, 1, 1, 2, 2, 2];
 
   let journeyIndex = 0;
 
@@ -203,6 +208,11 @@
 
     journeyScreens.forEach((screen, screenIndex) => {
       screen.classList.toggle("is-active", screenIndex === journeyIndex);
+    });
+
+    // La barra de pestañas del recorrido refleja el paso visible.
+    journeyTabs.forEach((tab, tabIndex) => {
+      tab.classList.toggle("is-active", tabIndex === TAB_POR_PASO[journeyIndex]);
     });
 
     journeyCounter.textContent = `Paso ${journeyIndex + 1} de ${total}`;
@@ -231,6 +241,11 @@
 
   journeyPrev.addEventListener("click", () => activateJourney(journeyIndex - 1));
   journeyNext.addEventListener("click", () => activateJourney(journeyIndex + 1));
+
+  // Los tabs del recorrido saltan al paso asociado (Inicio 01 · Perfil 02 · Buscar 04 · Rutina 06).
+  journeyTabs.forEach((tab) => {
+    tab.addEventListener("click", () => activateJourney(Number(tab.dataset.paso)));
+  });
 
   activateJourney(0);
 
