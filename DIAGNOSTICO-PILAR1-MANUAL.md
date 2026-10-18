@@ -154,7 +154,7 @@
 - **Id huérfano al crear perfil:** `endpoints.crearPerfil` no pasaba el `id` nuevo al store → la ficha creada no coincidía con la ruta; añadido tipo `NuevoPerfil` con `id` opcional.
 - `usePublicarPerfil` también invalida `qk.candidatosTodos` (clave nueva) para refrescar la lista de perfiles.
 
-### Arreglos de sesión (sprint 2 · commits `c7d55d1` + pendiente)
+### Arreglos de sesión (sprint 2)
 
 - **La sesión no se restauraba tras recargar en web (bug real):** `SecureStore` no existe en web (doc SDK 57: solo android/iOS/tvOS), así que `tokenStorage` usaba un `Map` en memoria y cada recarga perdía el token → login obligatorio. La rama web ahora usa **AsyncStorage (localStorage)**; nativo sigue en SecureStore. Flujo validado: login → token en `localStorage` → recarga → "Hola, Ana" sin formulario; logout → token `null`; re-login correcto.
 - **Destello de login y pérdida de ruta profunda:** mientras `estado === 'cargando'` el guard pintaba el formulario de login un instante y el router redirigía `/perfil` → `/`. Ahora el `Stack` no se monta hasta salir de `cargando`: contenedor neutro y **la URL original se conserva** (recarga en `/perfil` → se queda en `/perfil`).
