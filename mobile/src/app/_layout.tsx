@@ -3,7 +3,7 @@ import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import { useColorScheme } from 'react-native';
+import { StyleSheet, useColorScheme, View } from 'react-native';
 
 import { AppProviders } from '@/providers/app-providers';
 import { useEstadoAuth } from '@/hooks/use-auth';
@@ -40,28 +40,39 @@ export default function RootLayout() {
       {/* 'auto': contraste correcto de la barra de estado en claro y oscuro. */}
       <StatusBar style="auto" />
       <AppProviders>
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: theme.background },
-          }}>
-          {/* Sin sesión: solo autenticación */}
-          <Stack.Protected guard={!autenticado}>
-            <Stack.Screen name="(auth)" />
-          </Stack.Protected>
+        {/* Mientras la sesión está 'cargando' no se monta el Stack: si no, el
+            guard pinta el formulario de login un instante (destello) y el
+            router redirige la ruta profunda original (p. ej. /perfil) a '/'. */}
+        {estado === 'cargando' ? (
+          <View style={[styles.raiz, { backgroundColor: theme.background }]} />
+        ) : (
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: theme.background },
+            }}>
+            {/* Sin sesión: solo autenticación */}
+            <Stack.Protected guard={!autenticado}>
+              <Stack.Screen name="(auth)" />
+            </Stack.Protected>
 
-          {/* Con sesión: experiencia completa */}
-          <Stack.Protected guard={autenticado}>
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="cuidado/[id]" />
-            <Stack.Screen name="cuidado/nuevo" options={{ presentation: 'modal' }} />
-            <Stack.Screen name="cuenta" options={{ presentation: 'modal' }} />
-            <Stack.Screen name="publicar" options={{ presentation: 'modal' }} />
-            <Stack.Screen name="seleccion" />
-            <Stack.Screen name="servicios" />
-          </Stack.Protected>
-        </Stack>
+            {/* Con sesión: experiencia completa */}
+            <Stack.Protected guard={autenticado}>
+              <Stack.Screen name="(tabs)" />
+              <Stack.Screen name="cuidado/[id]" />
+              <Stack.Screen name="cuidado/nuevo" options={{ presentation: 'modal' }} />
+              <Stack.Screen name="cuenta" options={{ presentation: 'modal' }} />
+              <Stack.Screen name="publicar" options={{ presentation: 'modal' }} />
+              <Stack.Screen name="seleccion" />
+              <Stack.Screen name="servicios" />
+            </Stack.Protected>
+          </Stack>
+        )}
       </AppProviders>
     </ThemeProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  raiz: { flex: 1 },
+});

@@ -154,6 +154,11 @@
 - **Id huérfano al crear perfil:** `endpoints.crearPerfil` no pasaba el `id` nuevo al store → la ficha creada no coincidía con la ruta; añadido tipo `NuevoPerfil` con `id` opcional.
 - `usePublicarPerfil` también invalida `qk.candidatosTodos` (clave nueva) para refrescar la lista de perfiles.
 
+### Arreglos de sesión (sprint 2 · commits `c7d55d1` + pendiente)
+
+- **La sesión no se restauraba tras recargar en web (bug real):** `SecureStore` no existe en web (doc SDK 57: solo android/iOS/tvOS), así que `tokenStorage` usaba un `Map` en memoria y cada recarga perdía el token → login obligatorio. La rama web ahora usa **AsyncStorage (localStorage)**; nativo sigue en SecureStore. Flujo validado: login → token en `localStorage` → recarga → "Hola, Ana" sin formulario; logout → token `null`; re-login correcto.
+- **Destello de login y pérdida de ruta profunda:** mientras `estado === 'cargando'` el guard pintaba el formulario de login un instante y el router redirigía `/perfil` → `/`. Ahora el `Stack` no se monta hasta salir de `cargando`: contenedor neutro y **la URL original se conserva** (recarga en `/perfil` → se queda en `/perfil`).
+
 ### Archivos tocados
 
 `types/index.ts` · `utils/afinidad.ts` (+ `afinidad.test.ts`) · `utils/confirmar.ts` · `components/text.tsx` (codemod de imports en **25 ficheros**, script en `mobile/scripts/codemod-text-grande.js`) · `components/ui/badge.tsx` · `components/ui/field.tsx` · `providers/app-providers.tsx` · `store/data-store.ts` · `api/mocks.ts` · `api/endpoints.ts` · `app/seleccion.tsx` · `app/publicar.tsx` · `app/cuidado/[id].tsx` · `app/(tabs)/perfil.tsx` · `hooks/use-recorrido`.
