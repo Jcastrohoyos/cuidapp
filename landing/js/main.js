@@ -247,10 +247,10 @@
   const journeyCounter = $("#journey-counter");
   const journeyPrev = $("#journey-prev");
   const journeyNext = $("#journey-next");
-  // Barra de pestañas del recorrido (Inicio · Buscar · Rutina · Perfil).
+  // Barra de pestañas del recorrido (Inicio · Buscar · Rutina · Mi cuidador).
   const journeyTabs = $$(".app-tab--j");
-  // Cada paso se asocia a la pestaña que se ilumina: 0 Inicio · 1 Buscar · 2 Rutina · 3 Perfil.
-  const TAB_POR_PASO = [0, 3, 0, 1, 1, 2, 2, 2];
+  // Cada paso se asocia a la pestaña que se ilumina: 0 Inicio · 1 Buscar · 2 Rutina · 3 Mi cuidador.
+  const TAB_POR_PASO = [0, 0, 1, 3, 1, 2, 2, 2];
 
   let journeyIndex = 0;
 
@@ -307,7 +307,7 @@
   journeyPrev.addEventListener("click", () => activateJourney(journeyIndex - 1));
   journeyNext.addEventListener("click", () => activateJourney(journeyIndex + 1));
 
-  // Los tabs del recorrido saltan al paso asociado (Inicio 01 · Perfil 02 · Buscar 04 · Rutina 06).
+  // Los tabs del recorrido saltan al paso asociado (Inicio 01 · Buscar 03 · Mi cuidador 04 · Rutina 06).
   journeyTabs.forEach((tab) => {
     tab.addEventListener("click", () => activateJourney(Number(tab.dataset.paso)));
   });

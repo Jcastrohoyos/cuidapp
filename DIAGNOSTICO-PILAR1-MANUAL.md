@@ -230,7 +230,7 @@
 - **Fix latente importante:** las rutas **fuera de `Stack.Protected` quedan siempre accesibles** (doc Expo SDK 57, "Protected crea excepciones"). Quedan registradas en el guard: `cuidador` (ahora anidado en `(tabs)`), `rutina/nueva`, `ayuda` **e** `informes`/`perfil` (al moverlas del grupo de pestañas).
 - Rutas tipadas: tras los `git mv` hay que regenerar con **`npx expo customize tsconfig.json`** antes de `tsc`.
 - Prueba en navegador con RNW: tabs y chips son `Pressable` → hacen falta secuencias `pointerdown → mousedown → pointerup → mouseup → click` (un `click()` sintético no dispara el responder); `window.confirm` se intercepta para simular cancelar/aceptar.
-- **Hallazgo pendiente en la landing (no tocada):** el demo interactivo tiene la 4ª pestaña "Mi cuidador", pero la barra del **recorrido** (`.app-tabbar--j`) sigue diciendo "Perfil" (mapea al paso 02 "crear perfil"); decisión pendiente del usuario.
+- **Barra del recorrido de la landing alineada** (decisión del usuario): la 4ª pestaña pasa de "Perfil" a **"Mi cuidador"**; saltos `Inicio→01 · Buscar→03 · Mi cuidador→04 · Rutina→06` e iluminación por paso `TAB_POR_PASO = [0, 0, 1, 3, 1, 2, 2, 2]` (el paso 02 "Perfil de cuidado" ilumina Inicio, porque en la app real ese alta se hace desde Inicio). Verificado en navegador: cada pestaña salta a su paso y lo ilumina a ella misma; 0 errores de consola.
 
 ### Verificación
 
