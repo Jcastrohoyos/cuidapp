@@ -17,6 +17,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as mocks from '@/api/mocks';
 import type {
   CandidatoComparado,
+  ConfigCuidador,
   Familia,
   Incidencia,
   PerfilCuidado,
@@ -29,7 +30,8 @@ import { fechaHoy } from '@/utils/format';
 
 // v2: las semillas cambiaron para replicar la demo de la landing (2ª versión
 // de los datos de ejemplo); la clave nueva evita que la app cargue datos viejos.
-const STORAGE_KEY = 'cuidapp.demo_data.v2';
+// v3: se añaden tareas "solo hoy" (repeticion) y la configuración del cuidador.
+const STORAGE_KEY = 'cuidapp.demo_data.v3';
 
 const semillas = {
   familia: mocks.familiaDemo,
@@ -40,6 +42,7 @@ const semillas = {
   servicios: mocks.serviciosDemo,
   historial: mocks.historialDemo,
   candidatos: mocks.candidatosDemo,
+  configsCuidador: mocks.configCuidadorDemo,
 };
 
 /** Perfil a crear: el id es opcional (si no llega, lo genera el almacén). */
@@ -59,6 +62,8 @@ interface DataEstado {
   servicios: ServicioComplementario[];
   historial: RegistroHistorial[];
   candidatos: CandidatoComparado[];
+  /** Configuración de "Mi cuidador" por perfil (acuerdos y permisos). */
+  configsCuidador: Record<string, ConfigCuidador>;
 
   /* ---------- Navegación ---------- */
   perfilActivoId: string | null;
@@ -73,7 +78,12 @@ interface DataEstado {
 
   /* ---------- Tareas ---------- */
   setTareas: (tareas: Tarea[]) => void;
-  agregarTarea: (tarea: Omit<Tarea, 'id'>) => void;
+  /** Crea la tarea y devuelve el registro final (con su id asignado). */
+  agregarTarea: (tarea: Omit<Tarea, 'id'>) => Tarea;
+  eliminarTarea: (id: string) => void;
+
+  /* ---------- Configuración del cuidador ---------- */
+  setConfigCuidador: (config: ConfigCuidador) => void;
 
   /* ---------- Registros ---------- */
   setRegistros: (registros: RegistroTarea[]) => void;
@@ -113,6 +123,7 @@ export const useDataStore = create<DataEstado>()(
       servicios: semillas.servicios,
       historial: semillas.historial,
       candidatos: semillas.candidatos,
+      configsCuidador: semillas.configsCuidador,
       perfilActivoId: null,
 
       /* ---------- Cuenta familiar ---------- */
@@ -184,7 +195,16 @@ export const useDataStore = create<DataEstado>()(
       agregarTarea: (tarea) => {
         const nuevo: Tarea = { ...tarea, id: `tar_${Date.now()}` };
         set((state) => ({ tareas: [...state.tareas, nuevo] }));
+        return nuevo;
       },
+      eliminarTarea: (id) =>
+        set((state) => ({ tareas: state.tareas.filter((t) => t.id !== id) })),
+
+      /* ---------- Configuración del cuidador ---------- */
+      setConfigCuidador: (config) =>
+        set((state) => ({
+          configsCuidador: { ...state.configsCuidador, [config.perfilId]: config },
+        })),
 
       /* ---------- Registros ---------- */
       setRegistros: (registros) => set({ registros }),
@@ -260,6 +280,7 @@ export const useDataStore = create<DataEstado>()(
         servicios: state.servicios,
         historial: state.historial,
         candidatos: state.candidatos,
+        configsCuidador: state.configsCuidador,
         perfilActivoId: state.perfilActivoId,
       }),
     },

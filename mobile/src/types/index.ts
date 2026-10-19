@@ -174,6 +174,28 @@ export interface CandidatoComparado {
   cuidador: Cuidador;
 }
 
+/* ---------- Mi cuidador: acuerdos y permisos (tras la selección) ---------- */
+
+/** Lo que la familia permite que el cuidador vea y haga en la app. */
+export interface PermisosCuidador {
+  verDatosClinicos: boolean;
+  editarRutina: boolean;
+  verInformes: boolean;
+  registrarIncidencias: boolean;
+  avisarCompletadas: boolean;
+}
+
+/** Configuración del cuidador asignado a un perfil (pantalla /cuidador). */
+export interface ConfigCuidador {
+  perfilId: ID;
+  horarioAcordado?: string;
+  /** Tarifa acordada en €/h (la familia puede dejarla vacía). */
+  tarifaAcordada?: number;
+  /** Nota privada de la familia para el cuidador. */
+  nota?: string;
+  permisos: PermisosCuidador;
+}
+
 /* ---------- Servicios complementarios (paso 05) ---------- */
 
 export type CategoriaServicio = 'gestoria' | 'especialista' | 'sanitario' | 'formacion';
@@ -191,6 +213,9 @@ export interface ServicioComplementario {
 
 export type MomentoDia = 'manana' | 'mediodia' | 'tarde' | 'noche';
 
+/** 'diaria' repite cada día · 'unica' solo aparece en su `fechaAplicacion`. */
+export type RepeticionTarea = 'diaria' | 'unica';
+
 export interface Tarea {
   id: ID;
   perfilId: ID;
@@ -199,6 +224,9 @@ export interface Tarea {
   hora: string;
   responsableId?: ID;
   personalizada: boolean;
+  repeticion: RepeticionTarea;
+  /** Día concreto (ISO) para tareas 'unica': al pasar la fecha dejan de verse. */
+  fechaAplicacion?: ISODate;
 }
 
 export type EstadoRegistro = 'realizada' | 'pendiente' | 'incidencia';

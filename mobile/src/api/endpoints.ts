@@ -11,6 +11,7 @@ import { useDataStore } from '@/store/data-store';
 import { fechaHoy } from '@/utils/format';
 import type {
   CandidatoComparado,
+  ConfigCuidador,
   Familia,
   Incidencia,
   Informe,
@@ -141,6 +142,37 @@ export const endpoints = {
     return api.post<PerfilCuidado>(`/candidatos/${candidaturaId}/seleccionar`);
   },
 
+  /* ---- Mi cuidador: acuerdos y permisos ---- */
+  obtenerConfigCuidador: async (perfilId: string): Promise<ConfigCuidador> => {
+    if (USAR_MOCKS) {
+      const guardada = obtenerStore().configsCuidador[perfilId];
+      return modoDemo(
+        guardada ?? { perfilId, permisos: { ...mocks.permisosCuidadorPorDefecto } },
+      );
+    }
+    return api.get<ConfigCuidador>(`/perfiles/${perfilId}/cuidador/configuracion`);
+  },
+
+  guardarConfigCuidador: async (
+    perfilId: string,
+    cambios: Partial<Omit<ConfigCuidador, 'perfilId'>>,
+  ): Promise<ConfigCuidador> => {
+    if (USAR_MOCKS) {
+      const actual =
+        obtenerStore().configsCuidador[perfilId] ??
+        ({ perfilId, permisos: { ...mocks.permisosCuidadorPorDefecto } } as ConfigCuidador);
+      const config: ConfigCuidador = {
+        ...actual,
+        ...cambios,
+        perfilId,
+        permisos: { ...actual.permisos, ...(cambios.permisos ?? {}) },
+      };
+      obtenerStore().setConfigCuidador(config);
+      return modoDemo(config);
+    }
+    return api.patch<ConfigCuidador>(`/perfiles/${perfilId}/cuidador/configuracion`, cambios);
+  },
+
   /* ---- Servicios complementarios ---- */
   listarServicios: async (): Promise<ServicioComplementario[]> => {
     if (USAR_MOCKS) return modoDemo(obtenerStore().servicios);
@@ -193,6 +225,35 @@ export const endpoints = {
       return modoDemo(nuevo);
     }
     return api.post<RegistroTarea>(`/tareas/${tareaId}/registros`, { estado, responsableId, nota });
+  },
+
+  /** Añade una tarea creada por la familia (siempre personalizada). */
+  nuevaTarea: async (
+    perfilId: string,
+    datos: Omit<Tarea, 'id' | 'perfilId' | 'personalizada' | 'fechaAplicacion'>,
+  ): Promise<Tarea> => {
+    if (USAR_MOCKS) {
+      // El store asigna id y devuelve el registro final (mismo objeto que
+      // queda persistido): evita desfases entre el id creado y el devuelto.
+      return modoDemo(
+        obtenerStore().agregarTarea({
+          ...datos,
+          perfilId,
+          personalizada: true,
+          fechaAplicacion: datos.repeticion === 'unica' ? fechaHoy() : undefined,
+        }),
+      );
+    }
+    return api.post<Tarea>(`/perfiles/${perfilId}/tareas`, datos);
+  },
+
+  eliminarTarea: async (tareaId: string): Promise<void> => {
+    if (USAR_MOCKS) {
+      obtenerStore().eliminarTarea(tareaId);
+      await modoDemo(null);
+      return;
+    }
+    return api.delete<void>(`/tareas/${tareaId}`);
   },
 
   listarIncidencias: async (perfilId: string): Promise<Incidencia[]> => {

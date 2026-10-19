@@ -258,7 +258,10 @@ export default function PerfilCuidadoScreen() {
       )}
 
       {perfil.estado === 'con_cuidador' ? (
-        <Button titulo="Ver rutina de hoy" variante="ghost" onPress={() => router.push('/rutina')} />
+        <>
+          <Button titulo="Mi cuidador" variante="secondary" onPress={() => router.push('/cuidador')} />
+          <Button titulo="Ver rutina de hoy" variante="ghost" onPress={() => router.push('/rutina')} />
+        </>
       ) : null}
     </Screen>
   );

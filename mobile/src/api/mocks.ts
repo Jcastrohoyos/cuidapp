@@ -9,10 +9,12 @@
 
 import type {
   CandidatoComparado,
+  ConfigCuidador,
   Familia,
   Incidencia,
   Informe,
   PerfilCuidado,
+  PermisosCuidador,
   RegistroHistorial,
   RegistroTarea,
   ServicioComplementario,
@@ -279,12 +281,33 @@ export function candidaturasDeEjemplo(perfilId: string): CandidatoComparado[] {
 }
 
 export const tareasDemo: Tarea[] = [
-  { id: 'tar_1', perfilId: 'per_1', nombre: 'Medicación', momento: 'manana', hora: '09:00', responsableId: 'cui_1', personalizada: false },
-  { id: 'tar_2', perfilId: 'per_1', nombre: 'Ejercicios de movilidad', momento: 'manana', hora: '10:30', responsableId: 'cui_1', personalizada: false },
-  { id: 'tar_3', perfilId: 'per_1', nombre: 'Comida', momento: 'mediodia', hora: '13:00', responsableId: 'cui_3', personalizada: false },
-  { id: 'tar_4', perfilId: 'per_1', nombre: 'Paseo', momento: 'tarde', hora: '17:00', responsableId: 'cui_1', personalizada: false },
-  { id: 'tar_5', perfilId: 'per_1', nombre: 'Higiene y descanso', momento: 'noche', hora: '21:00', responsableId: 'cui_3', personalizada: false },
+  { id: 'tar_1', perfilId: 'per_1', nombre: 'Medicación', momento: 'manana', hora: '09:00', responsableId: 'cui_1', personalizada: false, repeticion: 'diaria' },
+  { id: 'tar_2', perfilId: 'per_1', nombre: 'Ejercicios de movilidad', momento: 'manana', hora: '10:30', responsableId: 'cui_1', personalizada: false, repeticion: 'diaria' },
+  { id: 'tar_3', perfilId: 'per_1', nombre: 'Comida', momento: 'mediodia', hora: '13:00', responsableId: 'cui_3', personalizada: false, repeticion: 'diaria' },
+  { id: 'tar_4', perfilId: 'per_1', nombre: 'Paseo', momento: 'tarde', hora: '17:00', responsableId: 'cui_1', personalizada: false, repeticion: 'diaria' },
+  { id: 'tar_5', perfilId: 'per_1', nombre: 'Higiene y descanso', momento: 'noche', hora: '21:00', responsableId: 'cui_3', personalizada: false, repeticion: 'diaria' },
 ];
+
+/** Permisos por defecto al abrir /cuidador sin configuración guardada. */
+export const permisosCuidadorPorDefecto: PermisosCuidador = {
+  // Coherente con la oferta: los datos clínicos se publican ocultos.
+  verDatosClinicos: false,
+  editarRutina: true,
+  verInformes: true,
+  registrarIncidencias: true,
+  avisarCompletadas: true,
+};
+
+/** Configuración inicial del cuidador seleccionado de Carmen (Laura R.). */
+export const configCuidadorDemo: Record<string, ConfigCuidador> = {
+  per_1: {
+    perfilId: 'per_1',
+    horarioAcordado: 'Lunes a viernes · 09:00–13:00',
+    tarifaAcordada: 14,
+    nota: 'La medicación queda preparada en la mesilla. Avisa si Carmen no termina la comida.',
+    permisos: permisosCuidadorPorDefecto,
+  },
+};
 
 const hoy = fechaHoy();
 

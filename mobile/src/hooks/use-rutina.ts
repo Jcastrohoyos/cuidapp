@@ -2,7 +2,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { endpoints } from '@/api/endpoints';
 import { qk } from '@/api/query-keys';
+import { tareasDelDia } from '@/utils/rutina';
 import type { Incidencia, RegistroTarea, Tarea } from '@/types';
+
+/** Datos para crear una tarea desde la familia (sin ids ni flags de origen). */
+export type NuevaTarea = Omit<Tarea, 'id' | 'perfilId' | 'personalizada' | 'fechaAplicacion'>;
 
 /** Rutina diaria de un perfil: tareas, registros del día e incidencias. */
 export function useRutina(perfilId: string, fecha: string) {
@@ -61,6 +65,28 @@ export function useRutina(perfilId: string, fecha: string) {
     },
   });
 
+  const agregar = useMutation({
+    mutationFn: (datos: NuevaTarea) => endpoints.nuevaTarea(perfilId, datos),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: qk.tareas(perfilId) }),
+  });
+
+  const eliminar = useMutation({
+    mutationFn: (tareaId: string) => endpoints.eliminarTarea(tareaId),
+    onMutate: async (tareaId) => {
+      // Actualización optimista: la fila desaparece al instante.
+      await queryClient.cancelQueries({ queryKey: qk.tareas(perfilId) });
+      const previas = queryClient.getQueryData<Tarea[]>(qk.tareas(perfilId));
+      queryClient.setQueryData<Tarea[]>(qk.tareas(perfilId), (actual = []) =>
+        actual.filter((t) => t.id !== tareaId),
+      );
+      return { previas };
+    },
+    onError: (_error, _tareaId, contexto) => {
+      if (contexto?.previas) queryClient.setQueryData(qk.tareas(perfilId), contexto.previas);
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: qk.tareas(perfilId) }),
+  });
+
   /** Estado vigente de una tarea: el registro más reciente (por id creciente). */
   const estadoTarea = (tareaId: string): RegistroTarea['estado'] => {
     const regs = (registros.data ?? []).filter((r) => r.tareaId === tareaId);
@@ -74,10 +100,13 @@ export function useRutina(perfilId: string, fecha: string) {
   };
 
   return {
-    tareas: (tareas.data ?? []) as Tarea[],
+    // Solo lo visible hoy: diarias + puntuales cuya fecha coincide.
+    tareas: tareasDelDia((tareas.data ?? []) as Tarea[], fecha),
     incidencias: (incidencias.data ?? []) as Incidencia[],
     estadoTarea,
     registrar,
+    agregar,
+    eliminar,
     cargando: tareas.isLoading || registros.isLoading,
     esError: tareas.isError || registros.isError,
     refetch: () => {

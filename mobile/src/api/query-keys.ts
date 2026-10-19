@@ -13,4 +13,5 @@ export const qk = {
   incidencias: (perfilId: string) => ['incidencias', perfilId] as const,
   informe: (perfilId: string) => ['informes', perfilId] as const,
   historial: (perfilId: string) => ['historial', perfilId] as const,
+  configCuidador: (perfilId: string) => ['configCuidador', perfilId] as const,
 };

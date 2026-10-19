@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { Text } from '@/components/text';
 
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
@@ -16,6 +17,7 @@ import { ThemedText } from '@/components/themed-text';
 import { usePerfilActivo } from '@/hooks/use-perfiles';
 import { useRutina } from '@/hooks/use-rutina';
 import { useTheme } from '@/hooks/use-theme';
+import { confirmar } from '@/utils/confirmar';
 import { fechaHoy, porcentaje, tiempoRelativo } from '@/utils/format';
 import { fam, FontSize, Spacing } from '@/constants/theme';
 
@@ -86,7 +88,7 @@ export default function RutinaScreen() {
     );
   }
 
-  const { tareas, estadoTarea, registrar } = rutina;
+  const { tareas, estadoTarea, registrar, eliminar } = rutina;
   const realizadas = tareas.filter((t) => estadoTarea(t.id) === 'realizada').length;
   const abiertas = rutina.incidencias.filter((i) => i.estado === 'abierta');
 
@@ -116,6 +118,20 @@ export default function RutinaScreen() {
                 responsableId: tarea.responsableId,
               })
             }
+            onEliminar={
+              tarea.personalizada
+                ? () =>
+                    confirmar(
+                      {
+                        titulo: 'Quitar de la rutina',
+                        mensaje: `Se eliminará "${tarea.nombre}" de la rutina${tarea.repeticion === 'unica' ? ' de hoy' : ''}. Las tareas fijas de la demo no se pueden quitar.`,
+                        accion: 'Quitar',
+                        destructiva: true,
+                      },
+                      () => eliminar.mutate(tarea.id),
+                    )
+                : undefined
+            }
           />
         ))}
         {tareas.length === 0 ? (
@@ -125,6 +141,13 @@ export default function RutinaScreen() {
           />
         ) : null}
       </View>
+
+      <Button
+        titulo="+ Añadir a la rutina"
+        variante="secondary"
+        fullWidth
+        onPress={() => router.push('/rutina/nueva')}
+      />
 
       <SectionHeader titulo="Incidencias" />
       {abiertas.length === 0 ? (

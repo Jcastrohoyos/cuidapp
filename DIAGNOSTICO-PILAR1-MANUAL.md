@@ -175,6 +175,36 @@
 
 ---
 
+## 3-ter. Checklist ampliable y pantalla "Mi cuidador" (19/10/2026)
+
+### ① La familia amplía el checklist del cuidador (Rutina)
+
+- **Alta desde la propia pestaña:** botón **"+ Añadir a la rutina"** → `/rutina/nueva` (formulario: nombre, momento del día con chips, hora opcional con validación `HH:MM` y **selector "A diario / Solo hoy"**). Sin hora, se asigna la hora habitual del momento elegido.
+- **Modelo de datos:** `Tarea.repeticion: 'diaria' | 'unica'` + `fechaAplicacion?`. El helper puro `utils/rutina.ts · tareasDelDia()` filtra las puntuales cuya fecha no coincide: **"solo hoy" desaparece sola al día siguiente** (cubierto por tests).
+- **Borrado:** las tareas personalizadas muestran ✕ con `confirmar()` (destructivo); las 5 fijas de la demo no lo pintan. El ✕ usa `stopPropagation` para no marcar la casilla de la fila (verificado en navegador). La adherencia de Informes se recalcula sola porque se basa en la lista de tareas del store.
+- **Persistencia:** `agregarTarea` del store ahora **devuelve** el registro creado (un solo `Date.now()` → sin desfase de ids, el bug que ya habíamos corregido en candidaturas); se añade `eliminarTarea` y mutación optimista en `use-rutina`. Semilla bump a `cuidapp.demo_data.v3`.
+
+### ② Pantalla "Mi cuidador" (perfil + acuerdos + permisos)
+
+- **Entrada:** desde el detalle de la persona en estado *Con cuidador* → botón **"Mi cuidador"** → `/cuidador`. Sin cuidador seleccionado: empty state con CTA a `/seleccion`.
+- **Tres bloques:** perfil de solo lectura (nombre, experiencia, valoración, biografía, competencias y verificaciones del tipo `Cuidador` existente) · **acuerdos** (horario, tarifa €/h, nota para el cuidador) · **permisos** con 5 switches (ver datos clínicos · editar rutina · ver informes · registrar incidencias · avisar al completar tareas).
+- **Coherencia con la oferta:** `verDatosClinicos` nace en **false**, igual que "datos clínicos: Oculto" publicado en `/publicar`.
+- **Modelo:** `ConfigCuidador` + `PermisosCuidador` en tipos; `configsCuidador` por perfil en el store (semilla para Carmen); endpoints `obtenerConfigCuidador` (GET) y `guardarConfigCuidador` (PATCH) con rama mock; hooks `use-cuidador.ts` (`useMiCuidador` deriva de la candidatura `seleccionada`). El formulario usa **estado derivado** (override por campo) en lugar de `useEffect` de sincronización, que el lint de React Compiler prohíbe.
+
+### Notas de implementación
+
+- **Rutas tipadas:** al añadir pantallas, `tsc` exige regenerar `.expo/types/router.d.ts`. El comando oficial sin arrancar servidor (doc Expo SDK 57) es **`npx expo customize tsconfig.json`**.
+- `api` no tiene `put`: la configuración usa `patch` (actualización parcial, semánticamente más exacto).
+
+### Verificación
+
+- `npx tsc --noEmit` ✅ · `npx expo lint` ✅ · `npx jest` → **56/56** (5 suites: +7 de `utils/rutina`, +2 de `TareaItem` con ✕) ✅.
+- Navegador (localhost:8125), **cero errores y cero avisos de consola**:
+  - **Checklist:** "Poner la lavada" (Tarde · 18:30 · Solo hoy) → aparece `18:30 · solo hoy` con ✕, progreso 2/6 → marcada 3/6 · "Comprar pan" (A diario) → `09:00 · personalizada` 3/7 → borrado con confirmación → 3/6 sin deseleccionar la otra · **recarga: la puntuale sigue (3/6) y la borrada no reaparece**.
+  - **Mi cuidador:** Laura R. "✓ Verificado" + 4 chips de verificación + competencias; acuerdos precargados (horario "Lunes a viernes · 09:00–13:00", tarifa 14, nota); permisos con datos clínicos OFF y el resto ON → se activa "Ver datos clínicos" y se edita el horario → guardar → **recarga: todo persiste** (horario nuevo, tarifa 14, los 5 switches ON).
+
+---
+
 ## Anexo · Peso del build Android (18/10/2026)
 
 - **Análisis del APK existente** (build 2, v1.0.0, descargado de EAS): **108 MB** (142,6 MB descomprimidos). Desglose: `lib/` ×4 ABI = **78 MB** (de los cuales **x86 + x86_64 = 43,5 MB son solo de emulador**), `dex` = **47,4 MB sin minificar** (6 `classes*.dex`), `res` = 8,6 MB, bundle Hermes = 4,2 MB, fuentes = 0,8 MB (los 6 pesos de Inter se usan — no recortables).

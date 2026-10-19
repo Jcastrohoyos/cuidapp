@@ -9,10 +9,12 @@ interface TareaItemProps {
   tarea: Tarea;
   estado: EstadoRegistro;
   onToggle: () => void;
+  /** Solo para tareas personalizadas: elimina la tarea de la rutina. */
+  onEliminar?: () => void;
 }
 
 /** Fila de tarea diaria con estado realizada / pendiente / incidencia. */
-export function TareaItem({ tarea, estado, onToggle }: TareaItemProps) {
+export function TareaItem({ tarea, estado, onToggle, onEliminar }: TareaItemProps) {
   const theme = useTheme();
   const realizada = estado === 'realizada';
   const incidencia = estado === 'incidencia';
@@ -42,10 +44,25 @@ export function TareaItem({ tarea, estado, onToggle }: TareaItemProps) {
         </Text>
         <Text style={[styles.meta, { color: theme.textSecondary }]} numberOfLines={1}>
           {tarea.hora}
-          {tarea.personalizada ? ' · personalizada' : ''}
+          {/* 'solo hoy' tiene prioridad sobre 'personalizada': es el dato que cambia. */}
+          {tarea.repeticion === 'unica' ? ' · solo hoy' : tarea.personalizada ? ' · personalizada' : ''}
           {incidencia ? ' · incidencia' : ''}
         </Text>
       </View>
+      {onEliminar ? (
+        <Pressable
+          onPress={(evento) => {
+            evento.stopPropagation?.();
+            onEliminar();
+          }}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel={`Eliminar ${tarea.nombre} de la rutina`}
+          accessibilityHint="Quita esta tarea personalizada de la rutina"
+          style={({ pressed }) => [styles.eliminar, pressed && styles.pressed]}>
+          <Text style={[styles.eliminarTexto, { color: theme.textSecondary }]}>✕</Text>
+        </Pressable>
+      ) : null}
       {incidencia ? (
         <View style={[styles.punto, { backgroundColor: theme.danger }]} />
       ) : null}
@@ -94,6 +111,17 @@ const styles = StyleSheet.create({
   meta: {
     fontFamily: fam(400),
     fontSize: FontSize.xs,
+  },
+  eliminar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  eliminarTexto: {
+    fontFamily: fam(600),
+    fontSize: FontSize.sm,
   },
   punto: {
     width: 8,
