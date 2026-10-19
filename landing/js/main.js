@@ -119,7 +119,7 @@
   }
 
   /* ------------------------------------------------------------
-     6. Demo: pestañas y tareas de la rutina
+     6. Demo: pestañas, checklist ampliable y permisos
      ------------------------------------------------------------ */
   // Pestañas del móvil de la demo principal (las del recorrido --j tienen su propia lógica).
   const tabs = $$(".app-tab:not(.app-tab--j)");
@@ -154,22 +154,87 @@
     });
   });
 
-  // Tareas de la rutina: marcar / desmarcar y actualizar progreso
-  const tasks = $$(".app-task", $("#app-tasks"));
-  const progressBar = $("#app-progress-bar");
-  const progressLabel = $("#app-progress-label");
+  // Rutina interactiva: marcar / desmarcar, añadir tareas nuevas (la familia
+  // amplía el checklist) y quitar las personalizadas. Usa delegación de
+  // eventos para que las tareas añadidas dinámicamente también respondan.
+  const initRoutine = (list, options = {}) => {
+    if (!list) return;
+    const { bar, label, sub, subFormat, addBtn } = options;
 
-  const updateProgress = () => {
-    const done = tasks.filter((task) => task.classList.contains("is-done")).length;
-    const percent = Math.round((done / tasks.length) * 100);
-    progressBar.style.width = `${percent}%`;
-    progressLabel.textContent = `${done} / ${tasks.length}`;
+    const update = () => {
+      const items = $$(".app-task", list);
+      const done = items.filter((task) => task.classList.contains("is-done")).length;
+      if (bar) bar.style.width = `${Math.round((done / items.length) * 100)}%`;
+      if (label) label.textContent = `${done} / ${items.length}`;
+      if (sub && subFormat) sub.textContent = subFormat(done, items.length);
+    };
+
+    list.addEventListener("click", (event) => {
+      const del = event.target.closest(".app-task__del");
+      if (del) {
+        del.closest("li").remove();
+        update();
+        return;
+      }
+      const task = event.target.closest(".app-task");
+      if (task) {
+        task.classList.toggle("is-done");
+        update();
+      }
+    });
+
+    // Muestras de tareas que la familia puede "añadir" en la demo.
+    const MUESTRAS = [
+      { nombre: "Comprar pan", hora: "09:00" },
+      { nombre: "Regar las plantas", hora: "11:30" },
+      { nombre: "Preparar la mochila del fisio", hora: "16:00" },
+    ];
+    let indice = 0;
+
+    if (addBtn) {
+      addBtn.addEventListener("click", () => {
+        if (indice >= MUESTRAS.length) return;
+        const muestra = MUESTRAS[indice++];
+        const li = document.createElement("li");
+        li.className = "app-task-li";
+        li.innerHTML =
+          '<button class="app-task" type="button">' +
+          '<span class="app-task__check"><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg></span>' +
+          "<span>" +
+          `<span class="app-task__name">${muestra.nombre}</span>` +
+          `<span class="app-task__time">${muestra.hora} · <span class="app-task__badge">personalizada</span></span>` +
+          "</span>" +
+          "</button>" +
+          `<button class="app-task__del" type="button" aria-label="Quitar ${muestra.nombre} de la rutina">✕</button>`;
+        list.append(li);
+        // Muestras agotadas: el botón queda inactivo en lugar de repetir.
+        if (indice >= MUESTRAS.length) addBtn.disabled = true;
+        update();
+      });
+    }
+
+    update();
   };
 
-  tasks.forEach((task) => {
-    task.addEventListener("click", () => {
-      task.classList.toggle("is-done");
-      updateProgress();
+  initRoutine($("#app-tasks"), {
+    bar: $("#app-progress-bar"),
+    label: $("#app-progress-label"),
+    sub: $("#app-routine-sub"),
+    subFormat: (done, total) => `Carmen · ${done} de ${total} tareas hoy`,
+    addBtn: $("#app-add-task"),
+  });
+
+  initRoutine($("#j-tasks"), {
+    bar: $("#j-progress-bar"),
+    label: $("#j-progress-label"),
+    addBtn: $("#j-add-task"),
+  });
+
+  // Permisos de "Mi cuidador": interruptores conmutables (role="switch").
+  $$(".app-switch-row").forEach((row) => {
+    row.addEventListener("click", () => {
+      const activo = row.getAttribute("aria-checked") === "true";
+      row.setAttribute("aria-checked", String(!activo));
     });
   });
 
@@ -249,28 +314,7 @@
 
   activateJourney(0);
 
-  // Progreso de la rutina diaria (pantalla 06)
-  const journeyRoutine = $("#screen-j-6");
-  const jProgressBar = $("#j-progress-bar");
-  const jProgressLabel = $("#j-progress-label");
-
-  if (journeyRoutine && jProgressBar && jProgressLabel) {
-    const jTasks = $$(".app-task", journeyRoutine);
-
-    const updateJourneyProgress = () => {
-      const done = jTasks.filter((task) => task.classList.contains("is-done")).length;
-      const percent = Math.round((done / jTasks.length) * 100);
-      jProgressBar.style.width = `${percent}%`;
-      jProgressLabel.textContent = `${done} / ${jTasks.length}`;
-    };
-
-    jTasks.forEach((task) => {
-      task.addEventListener("click", () => {
-        task.classList.toggle("is-done");
-        updateJourneyProgress();
-      });
-    });
-  }
+  // El progreso de las rutinas (pantallas 06 y demo) lo gestiona initRoutine.
 
   /* ------------------------------------------------------------
       8. Formulario de acceso anticipado

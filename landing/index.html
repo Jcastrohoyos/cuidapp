@@ -382,7 +382,8 @@
           <h2>Así se ve Cuidapp en el móvil</h2>
           <p class="lead">
             Navega por las pantallas principales del producto: el panel de la familia, la búsqueda de
-            profesionales, la rutina diaria de la persona cuidada y el perfil del cuidador.
+            profesionales, la rutina diaria que la familia amplía con sus propias tareas y la
+            configuración de Mi cuidador.
           </p>
         </header>
 
@@ -413,12 +414,19 @@
               <li class="demo__feature">
                 <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-calendar"></use></svg></span>
                 <div>
-                  <h3>Rutinas y seguimiento</h3>
-                  <p>Organiza las tareas del día y comprueba qué se ha completado en cada turno.</p>
+                  <h3>Rutinas que la familia amplía</h3>
+                  <p>Organiza las tareas del día y añade nuevas: a diario o solo para hoy, con un toque.</p>
+                </div>
+              </li>
+              <li class="demo__feature">
+                <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-caregiver"></use></svg></span>
+                <div>
+                  <h3>Mi cuidador</h3>
+                  <p>Perfil, acuerdos y permisos: decides qué datos ve y qué puede hacer en la app.</p>
                 </div>
               </li>
             </ul>
-            <p class="demo__note">Demo ilustrativa · maqueta de concepto v0.1 · no es una aplicación real</p>
+            <p class="demo__note">Demo ilustrativa · refleja el Pilar 1 · La familia · datos de ejemplo</p>
           </div>
 
           <div class="demo__stage reveal" style="--reveal-delay:120ms">
@@ -588,7 +596,7 @@
                         <header class="app-header">
                           <div>
                             <p class="app-header__hello">Rutina</p>
-                            <p class="app-header__sub">Carmen · 2 de 5 tareas hoy</p>
+                            <p class="app-header__sub" id="app-routine-sub">Carmen · 2 de 6 tareas hoy</p>
                           </div>
                           <span class="app-avatar">AM</span>
                         </header>
@@ -606,9 +614,9 @@
                         <div class="app-progress">
                           <div class="app-progress__head">
                             <span>Progreso del día</span>
-                            <span id="app-progress-label">2 / 5</span>
+                            <span id="app-progress-label">2 / 6</span>
                           </div>
-                          <div class="bar"><div class="bar__fill" id="app-progress-bar" style="width:40%"></div></div>
+                          <div class="bar"><div class="bar__fill" id="app-progress-bar" style="width:33%"></div></div>
                         </div>
 
                         <ul class="app-tasks" id="app-tasks">
@@ -657,14 +665,35 @@
                               </span>
                             </button>
                           </li>
+                          <li class="app-task-li">
+                            <button class="app-task" type="button">
+                              <span class="app-task__check"><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg></span>
+                              <span>
+                                <span class="app-task__name">Poner la lavada</span>
+                                <span class="app-task__time">18:30 · <span class="app-task__badge">solo hoy</span></span>
+                              </span>
+                            </button>
+                            <button class="app-task__del" type="button" aria-label="Quitar Poner la lavada de la rutina">✕</button>
+                          </li>
                         </ul>
+                        <button class="app-addtask" type="button" id="app-add-task">
+                          <span aria-hidden="true">＋</span> Añadir a la rutina
+                        </button>
                       </section>
 
-                      <!-- ========== PANTALLA: PERFIL ========== -->
+                      <!-- ========== PANTALLA: MI CUIDADOR ========== -->
                       <section class="app-screen" id="screen-profile" role="tabpanel" aria-labelledby="tab-profile">
+                        <header class="app-header">
+                          <div>
+                            <p class="app-header__hello">Mi cuidador</p>
+                            <p class="app-header__sub">Laura R. · Carmen</p>
+                          </div>
+                          <span class="app-avatar">AM</span>
+                        </header>
+
                         <div class="app-profile">
                           <span class="app-avatar app-avatar--xl">LR</span>
-                          <p class="app-profile__name">Laura Rodríguez</p>
+                          <p class="app-profile__name">Laura R.</p>
                           <p class="app-profile__role">
                             Cuidadora geriátrica
                             <svg class="icon" aria-hidden="true"><use href="#i-shield-check"></use></svg>
@@ -685,19 +714,55 @@
                             <span class="app-chip">Higiene postural</span>
                             <span class="app-chip app-chip--ghost">Primeros auxilios</span>
                           </div>
-
-                          <p class="app-profile__label">Sobre Laura</p>
-                          <p class="app-profile__text">
-                            Seis años acompañando a personas mayores a domicilio. Titulación en
-                            atención geriátrica y experiencia en movilidad reducida y pautas de
-                            medicación.
-                          </p>
-
-                          <div class="app-actions">
-                            <button class="app-btn app-btn--primary" type="button">Contactar</button>
-                            <button class="app-btn app-btn--ghost" type="button">Guardar</button>
-                          </div>
                         </div>
+
+                        <div class="app-section-head"><h4>Vuestros acuerdos</h4></div>
+                        <article class="app-card">
+                          <div class="app-kv">
+                            <div class="app-kv__row"><span class="app-kv__key">Horario</span><span class="app-kv__val">Lun–Vie · 09:00–13:00</span></div>
+                            <div class="app-kv__row"><span class="app-kv__key">Tarifa</span><span class="app-kv__val">14 €/h</span></div>
+                          </div>
+                          <p class="app-card__meta">“La medicación queda preparada en la mesilla. Avisa si Carmen no termina la comida.”</p>
+                        </article>
+
+                        <div class="app-section-head"><h4>Qué puede ver y hacer</h4></div>
+                        <article class="app-card">
+                          <button class="app-switch-row" type="button" role="switch" aria-checked="false">
+                            <span>
+                              <span class="app-switch-row__title">Ver datos clínicos</span>
+                              <span class="app-switch-row__sub">Por defecto ocultos</span>
+                            </span>
+                            <span class="app-switch" aria-hidden="true"><span class="app-switch__knob"></span></span>
+                          </button>
+                          <button class="app-switch-row" type="button" role="switch" aria-checked="true">
+                            <span>
+                              <span class="app-switch-row__title">Editar la rutina</span>
+                              <span class="app-switch-row__sub">Añadir o ajustar tareas del día</span>
+                            </span>
+                            <span class="app-switch" aria-hidden="true"><span class="app-switch__knob"></span></span>
+                          </button>
+                          <button class="app-switch-row" type="button" role="switch" aria-checked="true">
+                            <span>
+                              <span class="app-switch-row__title">Ver informes</span>
+                              <span class="app-switch-row__sub">Adherencia e incidencias</span>
+                            </span>
+                            <span class="app-switch" aria-hidden="true"><span class="app-switch__knob"></span></span>
+                          </button>
+                          <button class="app-switch-row" type="button" role="switch" aria-checked="true">
+                            <span>
+                              <span class="app-switch-row__title">Registrar incidencias</span>
+                              <span class="app-switch-row__sub">Apuntar y cerrar lo ocurrido en el turno</span>
+                            </span>
+                            <span class="app-switch" aria-hidden="true"><span class="app-switch__knob"></span></span>
+                          </button>
+                          <button class="app-switch-row" type="button" role="switch" aria-checked="true">
+                            <span>
+                              <span class="app-switch-row__title">Avisarme al completar tareas</span>
+                              <span class="app-switch-row__sub">Notificación al marcar tareas como hechas</span>
+                            </span>
+                            <span class="app-switch" aria-hidden="true"><span class="app-switch__knob"></span></span>
+                          </button>
+                        </article>
                       </section>
                     </div>
 
@@ -717,7 +782,7 @@
                       </button>
                       <button class="app-tab" type="button" role="tab" id="tab-profile" aria-selected="false" aria-controls="screen-profile" data-screen="profile" tabindex="-1">
                         <svg class="icon" aria-hidden="true"><use href="#i-caregiver"></use></svg>
-                        Perfil
+                        Mi cuidador
                       </button>
                     </nav>
                   </div>
@@ -803,7 +868,7 @@
                 <span class="journey__num">06</span>
                 <span class="journey__step-text">
                   <span class="journey__step-title">Rutinas y seguimiento</span>
-                  <span class="journey__step-sub">Tareas diarias e incidencias</span>
+                  <span class="journey__step-sub">Diarias, puntuales e incidencias</span>
                 </span>
               </button>
             </li>
@@ -902,6 +967,7 @@
                   <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Referencias y verificaciones realizadas, indicando su alcance.</span></li>
                   <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Condiciones económicas cuando estén disponibles.</span></li>
                   <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Criterios explicables, sin porcentajes ficticios como resultados reales.</span></li>
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Tras decidir, la familia fija en "Mi cuidador" los acuerdos y permisos: horario, tarifa y acceso a datos clínicos.</span></li>
                 </ul>
                 <p class="journey-panel__result">
                   <svg class="icon icon--sm" aria-hidden="true"><use href="#i-sparkles"></use></svg>
@@ -941,7 +1007,7 @@
                   <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Preparación de comidas y seguimiento de hábitos alimentarios.</span></li>
                   <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Paseos, ejercicios y movilidad.</span></li>
                   <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Acompañamiento y estimulación.</span></li>
-                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Rutinas personalizadas y otras tareas acordadas.</span></li>
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>La familia añade tareas al checklist desde la app: a diario o solo para hoy, con su hora.</span></li>
                   <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Registro de tareas realizadas, pendientes e incidencias.</span></li>
                   <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Consulta familiar del seguimiento y valoración del servicio.</span></li>
                 </ul>
@@ -1232,6 +1298,15 @@
                             <svg class="icon" aria-hidden="true"><use href="#i-sparkles"></use></svg>
                             <span>La afinidad se explica con datos registrados: ubicación, disponibilidad, experiencia y verificaciones. Sin porcentajes ficticios.</span>
                           </p>
+
+                          <article class="app-card app-card--row">
+                            <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-caregiver"></use></svg></span>
+                            <div class="app-card__body">
+                              <p class="app-card__title">Mi cuidador</p>
+                              <p class="app-card__meta">Acuerdos y permisos tras la selección</p>
+                            </div>
+                            <span class="app-card__link">Configurar</span>
+                          </article>
                         </section>
 
                         <!-- ========== PASO 05 · SERVICIOS COMPLEMENTARIOS ========== -->
@@ -1311,9 +1386,9 @@
                           <div class="app-progress">
                             <div class="app-progress__head">
                               <span>Progreso del día</span>
-                              <span id="j-progress-label">2 / 5</span>
+                              <span id="j-progress-label">2 / 6</span>
                             </div>
-                            <div class="bar"><div class="bar__fill" id="j-progress-bar" style="width:40%"></div></div>
+                            <div class="bar"><div class="bar__fill" id="j-progress-bar" style="width:33%"></div></div>
                           </div>
 
                           <ul class="app-tasks" id="j-tasks">
@@ -1362,7 +1437,20 @@
                                 </span>
                               </button>
                             </li>
+                            <li class="app-task-li">
+                              <button class="app-task" type="button">
+                                <span class="app-task__check"><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg></span>
+                                <span>
+                                  <span class="app-task__name">Poner la lavada</span>
+                                  <span class="app-task__time">18:30 · <span class="app-task__badge">solo hoy</span></span>
+                                </span>
+                              </button>
+                              <button class="app-task__del" type="button" aria-label="Quitar Poner la lavada de la rutina">✕</button>
+                            </li>
                           </ul>
+                          <button class="app-addtask" type="button" id="j-add-task">
+                            <span aria-hidden="true">＋</span> Añadir a la rutina
+                          </button>
 
                           <div class="app-section-head"><h4>Incidencias</h4></div>
                           <article class="app-card app-card--row">

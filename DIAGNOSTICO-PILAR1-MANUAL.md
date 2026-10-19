@@ -195,6 +195,7 @@
 
 - **Rutas tipadas:** al añadir pantallas, `tsc` exige regenerar `.expo/types/router.d.ts`. El comando oficial sin arrancar servidor (doc Expo SDK 57) es **`npx expo customize tsconfig.json`**.
 - `api` no tiene `put`: la configuración usa `patch` (actualización parcial, semánticamente más exacto).
+- **Demo de la landing actualizada** para reflejar estas dos funcionalidades: la pestaña Rutina de la demo (y la del paso 06 del recorrido) incluye la tarea "Poner la lavada · solo hoy" con ✕ y el botón **"+ Añadir a la rutina"** interactivo (añade tareas de muestra y recalcula progreso); la pestaña "Perfil" pasa a **"Mi cuidador"** con acuerdos (horario, tarifa, nota) y los 5 permisos como interruptores conmutables; el paso 04 del recorrido enlaza con "Mi cuidador". Validado en navegador con 0 errores de consola.
 
 ### Verificación
 
