@@ -4,6 +4,7 @@
 export const qk = {
   perfiles: ['perfiles'] as const,
   perfil: (id: string) => ['perfiles', id] as const,
+  cuidadores: ['cuidadores'] as const,
   candidatos: (perfilId: string) => ['candidatos', perfilId] as const,
   /** Prefijo para invalidar todas las candidaturas (p. ej. al publicar). */
   candidatosTodos: ['candidatos'] as const,

@@ -6,7 +6,9 @@ import Lucide from '@react-native-vector-icons/lucide';
 import { Colors } from '@/constants/theme';
 
 /**
- * Pestañas principales: Inicio, Rutina, Informes y Perfil.
+ * Pestañas principales: Inicio, Buscar, Rutina y Mi cuidador — los mismos
+ * cuatro tabs que la demo interactiva de la landing, para que la app real
+ * se vea igual que la demo.
  *
  * - Nativo: `NativeTabs` (barra nativa con iconos SF Symbols / Material).
  * - Web: `NativeTabs` dibuja solo una píldora flotante fija (sin iconos) que
@@ -21,17 +23,17 @@ import { Colors } from '@/constants/theme';
  */
 const PESTANAS = [
   { name: 'index', titulo: 'Inicio', icono: 'house', iconoMd: 'home' },
-  { name: 'rutina', titulo: 'Rutina', icono: 'list-checks', iconoMd: 'checklist' },
-  { name: 'informes', titulo: 'Informes', icono: 'chart-line', iconoMd: 'insights' },
-  { name: 'perfil', titulo: 'Perfil', icono: 'user', iconoMd: 'person' },
+  { name: 'buscar', titulo: 'Buscar', icono: 'search', iconoMd: 'search' },
+  { name: 'rutina', titulo: 'Rutina', icono: 'calendar', iconoMd: 'event' },
+  { name: 'cuidador', titulo: 'Mi cuidador', icono: 'user', iconoMd: 'person' },
 ] as const;
 
 /** Iconos iOS (SF Symbols) por pestaña, solo para el `NativeTabs` nativo. */
 const ICONOS_SF = {
   index: 'house.fill',
-  rutina: 'checklist',
-  informes: 'chart.bar.fill',
-  perfil: 'person.fill',
+  buscar: 'magnifyingglass',
+  rutina: 'calendar',
+  cuidador: 'person.fill',
 } as const;
 
 export default function TabLayout() {
@@ -74,7 +76,7 @@ export default function TabLayout() {
           <NativeTabs.Trigger.Label>{p.titulo}</NativeTabs.Trigger.Label>
           <NativeTabs.Trigger.Icon
             sf={ICONOS_SF[p.name]}
-            md={p.iconoMd === 'insights' ? 'monitoring' : p.iconoMd}
+            md={p.iconoMd}
           />
         </NativeTabs.Trigger>
       ))}

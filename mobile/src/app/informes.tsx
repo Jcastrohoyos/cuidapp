@@ -27,7 +27,7 @@ export default function InformesScreen() {
 
   const cabecera = (
     <ScreenHeader
-      variante="ninguno"
+      variante="atras"
       titulo="Informes"
       subtitulo={perfil ? `${perfil.persona.nombre} · semana en curso` : undefined}
     />

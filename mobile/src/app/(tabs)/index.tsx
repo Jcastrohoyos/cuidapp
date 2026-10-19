@@ -1,5 +1,6 @@
 import { Link, router } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
+import Lucide from '@react-native-vector-icons/lucide';
 import { Text } from '@/components/text';
 
 import { USAR_MOCKS } from '@/api/client';
@@ -21,10 +22,11 @@ import { useRutina } from '@/hooks/use-rutina';
 import { useSesion } from '@/hooks/use-auth';
 import { useTheme } from '@/hooks/use-theme';
 import { calcularEdad, fechaHoy, formatearHorario, porcentaje } from '@/utils/format';
-import { fam, FontSize, Radius } from '@/constants/theme';
+import { fam, FontSize, Radius, Spacing } from '@/constants/theme';
 
 export default function InicioScreen() {
   const sesion = useSesion();
+  const theme = useTheme();
   const { perfil, isLoading, esError, refetch } = usePerfilActivo();
   const hoy = fechaHoy();
   const rutina = useRutina(perfil?.id ?? '', hoy);
@@ -50,7 +52,7 @@ export default function InicioScreen() {
   if (esError) {
     return (
       <Screen>
-        <Saludo nombre={sesion?.familia.nombre ?? ''} />
+        <Cabecera nombre={sesion?.familia.nombre ?? ''} />
         <ErrorState accion={{ texto: 'Reintentar', onPress: () => void refetch() }} />
       </Screen>
     );
@@ -59,7 +61,7 @@ export default function InicioScreen() {
   if (!perfil) {
     return (
       <Screen>
-        <Saludo nombre={sesion?.familia.nombre ?? ''} />
+        <Cabecera nombre={sesion?.familia.nombre ?? ''} />
         <EmptyState
           titulo="Aún no hay perfiles de cuidado"
           descripcion="El perfil de cuidado es el eje de Cuidapp: describe a la persona y sus necesidades para organizar todo lo demás."
@@ -77,7 +79,30 @@ export default function InicioScreen() {
       void refetch();
       rutina.refetch();
     }}>
-      <Saludo nombre={sesion?.familia.nombre ?? ''} />
+      <Cabecera nombre={sesion?.familia.nombre ?? ''} />
+
+      {/* Atajo al buscador (mismo encaje que en la demo; abre la pestaña Buscar) */}
+      <Pressable
+        onPress={() => router.push('/buscar')}
+        accessibilityRole="button"
+        accessibilityLabel="Buscar cuidadores"
+        accessibilityHint="Abre la pestaña Buscar"
+        style={({ pressed }) => [
+          styles.buscador,
+          { backgroundColor: theme.backgroundElement, borderColor: theme.border },
+          pressed && styles.pulsado,
+        ]}>
+        <Lucide
+          name="search"
+          size={18}
+          color={theme.textSecondary}
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+        />
+        <Text style={[styles.buscadorTexto, { color: theme.textSecondary }]}>
+          Buscar cuidador o competencia
+        </Text>
+      </Pressable>
 
       {/* Perfil de cuidado activo */}
       <Link href={`/cuidado/${perfil.id}`} asChild>
@@ -125,6 +150,29 @@ export default function InicioScreen() {
         )}
       </Card>
 
+      {/* Acceso a los informes (dejó de ser pestaña: se abre desde Inicio) */}
+      <Card
+        row
+        onPress={() => router.push('/informes')}
+        accessibilityHint="Abre los informes de adherencia, incidencias e historial">
+        <Lucide
+          name="chart-line"
+          size={22}
+          color={theme.primary}
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+        />
+        <View style={styles.flex}>
+          <ThemedText type="smallBold">Informes</ThemedText>
+          <ThemedText type="small" themeColor="textSecondary">
+            Adherencia, incidencias e historial
+          </ThemedText>
+        </View>
+        <ThemedText type="small" themeColor="primary">
+          Ver
+        </ThemedText>
+      </Card>
+
       {/* Recorrido de los 7 pasos: progreso + solo lo que queda por hacer */}
       <Recorrido
         pasos={recorrido.pasos}
@@ -134,6 +182,25 @@ export default function InicioScreen() {
         onIr={(ruta) => router.push(ruta)}
       />
     </Screen>
+  );
+}
+
+/** Cabecera de Inicio: saludo + avatar que abre el perfil de cuenta
+ * (el avatar de la demo de la landing; Perfil ya no es pestaña). */
+function Cabecera({ nombre }: { nombre: string }) {
+  return (
+    <View style={styles.cabecera}>
+      <Saludo nombre={nombre} />
+      <Pressable
+        onPress={() => router.push('/perfil')}
+        accessibilityRole="button"
+        accessibilityLabel="Abrir mi perfil"
+        accessibilityHint="Abre tu cuenta, ajustes y ayuda"
+        hitSlop={8}
+        style={({ pressed }) => [styles.avatarBoton, pressed && styles.pulsado]}>
+        <Avatar nombre={nombre || 'familia'} />
+      </Pressable>
+    </View>
   );
 }
 
@@ -161,6 +228,31 @@ function Saludo({ nombre }: { nombre: string }) {
 }
 
 const styles = StyleSheet.create({
+  cabecera: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: Spacing.two,
+  },
+  avatarBoton: {
+    borderRadius: Radius.full,
+  },
+  pulsado: {
+    opacity: 0.7,
+  },
+  buscador: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: Radius.md,
+    paddingHorizontal: Spacing.three,
+    minHeight: 44,
+  },
+  buscadorTexto: {
+    fontFamily: fam(400),
+    fontSize: FontSize.base,
+  },
   saludo: {
     gap: 2,
   },

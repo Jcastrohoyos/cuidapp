@@ -10,6 +10,7 @@
 import type {
   CandidatoComparado,
   ConfigCuidador,
+  Cuidador,
   Familia,
   Incidencia,
   Informe,
@@ -259,6 +260,13 @@ export const candidatosDemo: CandidatoComparado[] = [
     },
   },
 ];
+
+/**
+ * Directorio de cuidadores para la pestaña Buscar: los mismos perfiles que
+ * aparecen en la demo de la landing (Laura R., Marta S. y Carlos D.), con sus
+ * datos reales de distancia, tarifa y valoración.
+ */
+export const cuidadoresDemo: Cuidador[] = candidatosDemo.map(({ cuidador }) => cuidador);
 
 /**
  * Candidaturas que llegan en la demo cuando la familia publica su oferta:

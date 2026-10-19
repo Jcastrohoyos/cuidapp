@@ -56,7 +56,7 @@ export default function PerfilScreen() {
 
   return (
     <Screen alRefrescar={() => void refetch()}>
-      <ScreenHeader variante="ninguno" titulo="Perfil" />
+      <ScreenHeader variante="atras" titulo="Perfil" />
 
       <Card row>
         <Avatar nombre={familia?.nombre ?? 'Familia'} tamano="lg" />
@@ -187,6 +187,12 @@ export default function PerfilScreen() {
           Estás en modo demo con datos de ejemplo sin backend.
         </ThemedText>
       ) : null}
+
+      <Button
+        titulo="Cómo funciona Cuidapp"
+        variante="secondary"
+        onPress={() => router.push('/ayuda')}
+      />
 
       <Button titulo="Cerrar sesión" variante="danger" onPress={confirmarSalir} />
     </Screen>

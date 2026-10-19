@@ -56,7 +56,9 @@ export default function RootLayout() {
               <Stack.Screen name="(auth)" />
             </Stack.Protected>
 
-            {/* Con sesión: experiencia completa */}
+            {/* Con sesión: experiencia completa. Toda pantalla apilada debe
+                declararse aquí: las rutas fuera de Stack.Protected quedan
+                siempre accesibles (doc Expo: "Protected crea excepciones"). */}
             <Stack.Protected guard={autenticado}>
               <Stack.Screen name="(tabs)" />
               <Stack.Screen name="cuidado/[id]" />
@@ -65,6 +67,10 @@ export default function RootLayout() {
               <Stack.Screen name="publicar" options={{ presentation: 'modal' }} />
               <Stack.Screen name="seleccion" />
               <Stack.Screen name="servicios" />
+              <Stack.Screen name="informes" />
+              <Stack.Screen name="perfil" />
+              <Stack.Screen name="rutina/nueva" />
+              <Stack.Screen name="ayuda" />
             </Stack.Protected>
           </Stack>
         )}

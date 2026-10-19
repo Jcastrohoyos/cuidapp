@@ -62,3 +62,20 @@ export function usePublicarPerfil(id: string) {
     },
   });
 }
+
+export function useEliminarPerfil() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => endpoints.eliminarPerfil(id),
+    onSuccess: (_datos, id) => {
+      // El detalle ya no existe: se descarta su caché para no servir un 404.
+      queryClient.removeQueries({ queryKey: qk.perfil(id) });
+      queryClient.invalidateQueries({ queryKey: qk.perfiles });
+      // Todo lo que cuelga del perfil desaparece del almacén demo → refrescar
+      // por prefijo (['tareas'] alcanza a ['tareas', perfilId], …).
+      (
+        ['tareas', 'registros', 'incidencias', 'informes', 'historial', 'configCuidador'] as const
+      ).forEach((clave) => queryClient.invalidateQueries({ queryKey: [clave] }));
+    },
+  });
+}

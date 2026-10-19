@@ -27,6 +27,7 @@ import type {
   Tarea,
 } from '@/types';
 import { fechaHoy } from '@/utils/format';
+import { depurarDatosDePerfil } from '@/utils/perfiles';
 
 // v2: las semillas cambiaron para replicar la demo de la landing (2ª versión
 // de los datos de ejemplo); la clave nueva evita que la app cargue datos viejos.
@@ -73,6 +74,8 @@ interface DataEstado {
   agregarPerfil: (perfil: NuevoPerfil) => void;
   actualizarPerfil: (id: string, cambios: Partial<PerfilCuidado>) => void;
   publicarPerfil: (id: string) => void;
+  /** Quita a la persona a cargo y depura todo lo que cuelga de su perfil. */
+  eliminarPerfil: (id: string) => void;
   recibirCandidaturas: (perfilId: string, candidaturas: CandidatoComparado[]) => void;
   seleccionarCandidatoEnPerfil: (candidaturaId: string) => void;
 
@@ -159,6 +162,8 @@ export const useDataStore = create<DataEstado>()(
             p.id === id ? { ...p, estado: 'publicado', actualizadoEn: new Date().toISOString() } : p,
           ),
         })),
+
+      eliminarPerfil: (id) => set((state) => depurarDatosDePerfil(state, id)),
 
       recibirCandidaturas: (perfilId, candidaturas) =>
         set((state) => ({

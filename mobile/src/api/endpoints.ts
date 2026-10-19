@@ -12,6 +12,7 @@ import { fechaHoy } from '@/utils/format';
 import type {
   CandidatoComparado,
   ConfigCuidador,
+  Cuidador,
   Familia,
   Incidencia,
   Informe,
@@ -104,6 +105,23 @@ export const endpoints = {
       return modoDemo(p);
     }
     return api.patch<PerfilCuidado>(`/perfiles/${id}`, cambios);
+  },
+
+  eliminarPerfil: async (id: string): Promise<void> => {
+    if (USAR_MOCKS) {
+      // En demo, el almacén local es la fuente de verdad (y su acción ya
+      // depura tareas, registros, incidencias, candidaturas e historial).
+      obtenerStore().eliminarPerfil(id);
+      await modoDemo(null);
+      return;
+    }
+    return api.delete<void>(`/perfiles/${id}`);
+  },
+
+  /* ---- Buscar cuidadores (directorio) ---- */
+  listarCuidadores: async (): Promise<Cuidador[]> => {
+    if (USAR_MOCKS) return modoDemo(mocks.cuidadoresDemo);
+    return api.get<Cuidador[]>('/cuidadores');
   },
 
   /* ---- Publicación y selección ---- */

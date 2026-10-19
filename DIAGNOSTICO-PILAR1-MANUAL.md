@@ -204,6 +204,43 @@
   - **Checklist:** "Poner la lavada" (Tarde · 18:30 · Solo hoy) → aparece `18:30 · solo hoy` con ✕, progreso 2/6 → marcada 3/6 · "Comprar pan" (A diario) → `09:00 · personalizada` 3/7 → borrado con confirmación → 3/6 sin deseleccionar la otra · **recarga: la puntuale sigue (3/6) y la borrada no reaparece**.
   - **Mi cuidador:** Laura R. "✓ Verificado" + 4 chips de verificación + competencias; acuerdos precargados (horario "Lunes a viernes · 09:00–13:00", tarifa 14, nota); permisos con datos clínicos OFF y el resto ON → se activa "Ver datos clínicos" y se edita el horario → guardar → **recarga: todo persiste** (horario nuevo, tarifa 14, los 5 switches ON).
 
+## 3-cuarto. Tutorial, eliminar a la persona y tabs alineados con la demo (19/10/2026)
+
+### ① Tutorial integrado · `/ayuda`
+
+- **Pantalla** "Cómo funciona Cuidapp": cabecera + 6 pasos en tarjetas con **círculos numerados** (sin iconos Lucide: se evita cualquier riesgo por nombre de glifo) + bloque de consejos. Entrada desde **Perfil → "Cómo funciona Cuidapp"**.
+- Registrada en el guard de sesión del `_layout` raíz (ver Notas).
+
+### ② Quitar a la persona · zona de peligro en `/cuidado/[id]`
+
+- **UI:** `SectionHeader "Quitar a la persona"` + aviso (qué se borra con ello) + botón **danger** `Eliminar a {nombre}` con `cargando` mientras muta.
+- **Confirmación:** `confirmar({ …, destructiva: true })` → `window.confirm` en web con mensaje explícito ("… Esta acción no se puede deshacer. ¿Continuar?").
+- **Purga de datos:** helper puro **`utils/perfiles.ts · depurarDatosDePerfil()`** — borra el perfil, sus tareas **y los registros por `tareaId`**, incidencias, candidaturas, historial, `configsCuidador` y el `perfilActivoId` si apuntaba a ese perfil (**5 tests**).
+- **Flujo:** `eliminarPerfil` (store + `endpoints.eliminarPerfil` DELETE con rama mock) · `useEliminarPerfil` invalida detalle + listados por prefijo (tareas/registros/incidencias/informes/historial/configCuidador) · si era el activo → `establecerPerfilActivo(null)` · `router.replace('/(tabs)')`.
+
+### ③ Pestañas de la app = pestañas de la demo (corrección de dirección)
+
+- **Contexto:** el usuario aclaró que **la demo de la landing es el diseño correcto** y que la app era la que debía parecerse a ella (no al revés: se revirtió con `git checkout -- landing/` un alineamiento inverso hecho por error, dejando la landing en su estado commiteado `9e1ec96`).
+- **Antes → Ahora:** `Inicio · Rutina · Informes · Perfil` → **`Inicio · Buscar · Rutina · Mi cuidador`** (idénticas a la demo), con iconos de la guía visual: Lucide `house/search/calendar/user` · Material `home/search/event/person` · SF `house.fill/magnifyingglass/calendar/person.fill`.
+- **Nueva pestaña Buscar** (`(tabs)/buscar.tsx`): directorio con los mismos cuidadores de la demo (Laura 12 €/h · 4,9(27)…); **buscador de texto real** sobre nombre/biografía/competencias insensible a acentos; chips **`Madrid · 10 km` · Disponibilidad · Verificados · `+4,5`** aplicados sobre las preferencias reales de la familia (`distanciaMaxKm`, `franjas`, `verificacionesMinimas`, umbral 4,5); recuento vivo ("N cuidadores coinciden", singular/plural), filas con experiencia/valoración/distancia/tarifa, chips de competencias, marca ✓ Verificado y **% de afinidad real** (`calcularAfinidad`, umbrales ≥70/≥40 igual que Selección); estado vacío con **"Quitar filtros"**. Helper puro **`utils/buscar-cuidadores.ts`** con **12 tests** (cada chip por separado, combinados y bordes: sin distancia, sin franjas, sin verificaciones mínimas → no se juzga, nada inventado).
+- **Mi cuidador** deja de ser ruta apilada: se mueve a `(tabs)/cuidador.tsx` (cabecera `ninguno`, como pestaña) y sigue enlazable desde `/cuidado/[id]`. **Informes** y **Perfil** salen del tab bar a rutas apiladas (cabecera `atras`): Informes se abre desde **tarjeta en Inicio** ("Adherencia, incidencias e historial · Ver") y Perfil desde el **avatar AM** de la cabecera de Inicio (el avatar de la demo).
+
+### Notas de implementación
+
+- **Fix latente importante:** las rutas **fuera de `Stack.Protected` quedan siempre accesibles** (doc Expo SDK 57, "Protected crea excepciones"). Quedan registradas en el guard: `cuidador` (ahora anidado en `(tabs)`), `rutina/nueva`, `ayuda` **e** `informes`/`perfil` (al moverlas del grupo de pestañas).
+- Rutas tipadas: tras los `git mv` hay que regenerar con **`npx expo customize tsconfig.json`** antes de `tsc`.
+- Prueba en navegador con RNW: tabs y chips son `Pressable` → hacen falta secuencias `pointerdown → mousedown → pointerup → mouseup → click` (un `click()` sintético no dispara el responder); `window.confirm` se intercepta para simular cancelar/aceptar.
+- **Hallazgo pendiente en la landing (no tocada):** el demo interactivo tiene la 4ª pestaña "Mi cuidador", pero la barra del **recorrido** (`.app-tabbar--j`) sigue diciendo "Perfil" (mapea al paso 02 "crear perfil"); decisión pendiente del usuario.
+
+### Verificación
+
+- `npx tsc --noEmit` ✅ · `npx expo lint` ✅ · `npx jest` → **73/73** (7 suites: +12 de `buscar-cuidadores`) ✅.
+- Navegador (localhost:8125), **cero errores de consola**:
+  - **Inicio:** avatar AM · buscador · tarjeta Informes · barra con **Inicio · Buscar · Rutina · Mi cuidador**.
+  - **Buscar:** "diabetes" → 2 · chip "Verificados" → 1 ("1 cuidador coincide") · ✕ → 2 · "zzz" → "Sin coincidencias" → "Quitar filtros" → 3.
+  - **Mi cuidador** (pestaña, sin botón atrás) con perfil y acuerdos · **Informes** con `‹` que vuelve · **Perfil** con `‹` → **`/ayuda`** con los 6 pasos · **Rutina** pinta progreso, tareas e incidencias.
+  - **Eliminar:** cancelar → nada cambia y el mensaje es el correcto · aceptar → home "Aún no hay perfiles de cuidado" · **recarga → sigue vacío** (persistencia) · borrar `localStorage cuidapp.demo_data.v3` → **recarga restaura las semillas** (Carmen + rutina).
+
 ---
 
 ## Anexo · Peso del build Android (18/10/2026)

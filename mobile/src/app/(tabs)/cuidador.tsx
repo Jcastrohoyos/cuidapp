@@ -94,7 +94,7 @@ export default function CuidadorScreen() {
   if (cargando) {
     return (
       <Screen>
-        <ScreenHeader variante="atras" titulo="Mi cuidador" />
+        <ScreenHeader variante="ninguno" titulo="Mi cuidador" />
         <Skeleton alto={120} />
         <Skeleton alto={20} ancho="45%" />
         <Skeleton alto={140} />
@@ -105,7 +105,7 @@ export default function CuidadorScreen() {
   if (error) {
     return (
       <Screen>
-        <ScreenHeader variante="atras" titulo="Mi cuidador" />
+        <ScreenHeader variante="ninguno" titulo="Mi cuidador" />
         <ErrorState
           accion={{
             texto: 'Reintentar',
@@ -123,7 +123,7 @@ export default function CuidadorScreen() {
   if (!perfil) {
     return (
       <Screen>
-        <ScreenHeader variante="atras" titulo="Mi cuidador" />
+        <ScreenHeader variante="ninguno" titulo="Mi cuidador" />
         <EmptyState
           titulo="Todavía no hay perfil de cuidado"
           descripcion="El cuidador se asigna a un perfil de cuidado concreto."
@@ -136,7 +136,7 @@ export default function CuidadorScreen() {
   if (!cuidador) {
     return (
       <Screen>
-        <ScreenHeader variante="atras" titulo="Mi cuidador" />
+        <ScreenHeader variante="ninguno" titulo="Mi cuidador" />
         <EmptyState
           titulo="Sin cuidador asignado todavía"
           descripcion="Cuando selecciones a un cuidador entre las candidaturas, podrás ver su perfil y configurar acuerdos y permisos aquí."
@@ -166,7 +166,7 @@ export default function CuidadorScreen() {
   return (
     <Screen alRefrescar={configQuery.refetch}>
       <ScreenHeader
-        variante="atras"
+        variante="ninguno"
         titulo="Mi cuidador"
         subtitulo={`${cuidador.nombre} · ${perfil.persona.nombre}`}
       />

@@ -16,7 +16,7 @@ import { Screen } from '@/components/ui/screen';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { SectionHeader } from '@/components/ui/section-header';
 import { ThemedText } from '@/components/themed-text';
-import { usePerfil, usePublicarPerfil } from '@/hooks/use-perfiles';
+import { usePerfil, usePublicarPerfil, useEliminarPerfil } from '@/hooks/use-perfiles';
 import { useAuthStore } from '@/store/auth-store';
 import { useTheme } from '@/hooks/use-theme';
 import { useToast } from '@/hooks/use-toast';
@@ -47,8 +47,10 @@ export default function PerfilCuidadoScreen() {
   const toast = useToast();
   const { id } = useLocalSearchParams<{ id: string }>();
   const establecerPerfilActivo = useAuthStore((estado) => estado.establecerPerfilActivo);
+  const perfilActivoId = useAuthStore((estado) => estado.perfilActivoId);
   const { data: perfil, isLoading, isError, refetch } = usePerfil(id ?? '');
   const publicar = usePublicarPerfil(id ?? '');
+  const eliminar = useEliminarPerfil();
 
   useEffect(() => {
     if (id) establecerPerfilActivo(id);
@@ -263,6 +265,39 @@ export default function PerfilCuidadoScreen() {
           <Button titulo="Ver rutina de hoy" variante="ghost" onPress={() => router.push('/rutina')} />
         </>
       ) : null}
+
+      {/* Quitar a la persona: destructivo y con confirmación explícita. */}
+      <SectionHeader titulo="Quitar a la persona" />
+      <ThemedText type="small" themeColor="textSecondary" style={styles.aviso}>
+        Si ya no necesitáis acompañamiento, elimina el perfil de {perfil.persona.nombre}. Se borran
+        también su rutina, incidencias, candidaturas, historial y la configuración del cuidador. No
+        se puede deshacer.
+      </ThemedText>
+      <Button
+        titulo={`Eliminar a ${perfil.persona.nombre}`}
+        variante="danger"
+        cargando={eliminar.isPending}
+        onPress={() =>
+          confirmar(
+            {
+              titulo: 'Eliminar perfil',
+              mensaje: `Se eliminará el perfil de ${perfil.persona.nombre} con toda su información (rutina, incidencias, candidaturas e historial). Esta acción no se puede deshacer. ¿Continuar?`,
+              accion: 'Eliminar',
+              destructiva: true,
+            },
+            () =>
+              eliminar.mutate(id ?? '', {
+                onSuccess: () => {
+                  // Si el activo era este, se despeja para que el resto de
+                  // pantallas resuelvan el siguiente perfil (o el vacío).
+                  if (perfilActivoId === id) establecerPerfilActivo(null);
+                  toast.exito(`El perfil de ${perfil.persona.nombre} se ha eliminado.`);
+                  router.replace('/(tabs)');
+                },
+              }),
+          )
+        }
+      />
     </Screen>
   );
 }
@@ -306,5 +341,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: Spacing.three,
     alignItems: 'flex-start',
+  },
+  aviso: {
+    lineHeight: 18,
   },
 });
