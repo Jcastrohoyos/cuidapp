@@ -175,8 +175,23 @@
 
 ---
 
+## Anexo · Peso del build Android (18/10/2026)
+
+- **Análisis del APK existente** (build 2, v1.0.0, descargado de EAS): **108 MB** (142,6 MB descomprimidos). Desglose: `lib/` ×4 ABI = **78 MB** (de los cuales **x86 + x86_64 = 43,5 MB son solo de emulador**), `dex` = **47,4 MB sin minificar** (6 `classes*.dex`), `res` = 8,6 MB, bundle Hermes = 4,2 MB, fuentes = 0,8 MB (los 6 pesos de Inter se usan — no recortables).
+- **Dependencias sin uso heredadas del scaffold** (cero imports en `src/`): retiradas `expo-device`, `expo-image` (aportaba `libavif_android.so` ≈ 7 MB) y `expo-web-browser`; `@expo/ui`, `expo-glass-effect` y `expo-symbols` siguen transitivas vía `expo-router` (su declaración directa eliminada, sin efecto en el peso).
+- **Cambios aplicados** (API verificada en la doc de SDK 57): plugin `expo-build-properties` en `app.json` con `android.buildArchs: ["armeabi-v7a", "arm64-v8a"]` (solo ABI reales de móvil), `enableMinifyInReleaseBuilds: true` (R8) y `enableShrinkResourcesInReleaseBuilds: true`.
+- **Validación:** tsc 0 · lint 0 · jest 48/48 · expo-doctor 21/21 · `check-release apk` OK.
+- **Pendiente:** confirmar el peso real (~55-70 MB estimados) con el siguiente build; si el APK fallara al arrancar por reglas R8, revertir `enableMinifyInReleaseBuilds` (es el interruptor a tocar).
+
+---
+
 1. Numerar las fases **07 · Información e informes** y **08 · Datos e historial** con su "Resultado esperado".
 2. Anexar la **ficha de campos mínimos del alta de la persona atendida** (obligatorios vs. opcionales) basada en el formulario implementado — cierra la decisión pendiente de §7 sobre datos obligatorios.
 3. Añadir secciones cortas de **mensajería/notificaciones** (aunque sea como propuesta) y de **accesibilidad + soporte**.
 4. Incluir **KPIs de validación** junto al criterio de aceptación del §8.
 5. Marcar en §8 qué estados del proceso son MVP y cuáles fase posterior (hoy el producto cubre 4 de 7, con la nueva fase "en selección" + bandeja de candidaturas).
+
+
+
+prod apk
+npx eas-cli build --platform android --profile apk
