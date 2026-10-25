@@ -19,8 +19,19 @@ config.resolver.extraNodeModules = {
 // Excluir módulos web de expo-sqlite que importan .wasm
 config.resolver.blockList = config.resolver.blockList || [];
 config.resolver.blockList.push(
-  /node_modules\/expo-sqlite\/web\/.*/,
-  /node_modules\/expo-sqlite\/build\/ExpoSQLite\.web\.js/
+  /node_modules[\\/]expo-sqlite[\\/]web/,
+  /node_modules[\\/]expo-sqlite[\\/]build[\\/].*web/
 );
+
+// Interceptar solicitudes de módulos web de expo-sqlite y devolver módulo vacío
+config.resolver.requestInterceptor = (context, moduleName, platform, moduleFormat) => {
+  if (moduleName && (moduleName.includes('expo-sqlite/web') || moduleName.includes('expo-sqlite/build/web'))) {
+    return {
+      filePath: path.resolve(__dirname, 'empty-module.js'),
+      exists: true,
+    };
+  }
+  return context.requestInterceptor(moduleName, platform, moduleFormat);
+};
 
 module.exports = config;
