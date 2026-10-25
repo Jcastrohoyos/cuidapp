@@ -81,7 +81,7 @@ jobs:
       # --- Build APK ---
       - name: Build Release APK
         working-directory: ./mobile/android
-        run: ./gradlew assembleRelease --no-daemon
+        run: ./gradlew assembleRelease --no-daemon -Dorg.gradle.jvmargs="-Xmx3g -XX:MaxMetaspaceSize=1g"
 
       # --- Upload Artifact ---
       - name: Upload APK
