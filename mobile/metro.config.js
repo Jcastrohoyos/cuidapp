@@ -8,4 +8,11 @@ config.resolver.assetExts = config.resolver.assetExts.filter((ext) => ext !== 'w
 // Configurar plataformas para Android (no web)
 config.resolver.platforms = ['ios', 'android', 'native'];
 
+// Excluir módulos de Node.js que no funcionan en Android (better-sqlite3, fs)
+config.resolver.blockList = config.resolver.blockList || [];
+config.resolver.blockList.push(
+  /node_modules\/better-sqlite3/,
+  /node_modules\/fs/
+);
+
 module.exports = config;
