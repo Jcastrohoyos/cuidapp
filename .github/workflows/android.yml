@@ -79,12 +79,23 @@ jobs:
         run: npx expo prebuild --platform android --clean
 
       # --- Build APK ---
+      - name: Build Debug APK
+        working-directory: ./mobile/android
+        run: ./gradlew assembleDebug --no-daemon -Dorg.gradle.jvmargs="-Xmx3g -XX:MaxMetaspaceSize=1g"
+
       - name: Build Release APK
         working-directory: ./mobile/android
         run: ./gradlew assembleRelease --no-daemon -Dorg.gradle.jvmargs="-Xmx3g -XX:MaxMetaspaceSize=1g"
 
-      # --- Upload Artifact ---
-      - name: Upload APK
+      # --- Upload Artifacts ---
+      - name: Upload Debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug-apk
+          path: mobile/android/app/build/outputs/apk/debug/*.apk
+          retention-days: 30
+
+      - name: Upload Release APK
         uses: actions/upload-artifact@v4
         with:
           name: app-release-apk
