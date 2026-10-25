@@ -16,6 +16,7 @@ import { useCrearPerfil } from '@/hooks/use-perfiles';
 import { useSesion } from '@/hooks/use-auth';
 import { useTheme } from '@/hooks/use-theme';
 import { useToast } from '@/hooks/use-toast';
+import { useDataStore } from '@/store/data-store';
 import { fam, FontSize, Spacing } from '@/constants/theme';
 import type { DiaSemana, GeneroPersona, TipoAtencion } from '@/types';
 
@@ -194,6 +195,7 @@ export default function NuevoPerfilScreen() {
   const toast = useToast();
   const sesion = useSesion();
   const crear = useCrearPerfil();
+  const establecerPerfilActivo = useDataStore((estado) => estado.establecerPerfilActivo);
 
   const {
     handleSubmit,
@@ -284,10 +286,9 @@ export default function NuevoPerfilScreen() {
 
     // El borrador se mantiene en el formulario si falla el guardado.
     try {
-      await crear.mutateAsync({
+      const creado = await crear.mutateAsync({
         familiaId: sesion.familia.id,
         persona: {
-          id: `per_${Date.now()}`,
           nombre: datos.nombrePersona,
           fechaNacimiento: aISO(datos.fechaNacimiento),
           relacion: datos.relacion || undefined,
@@ -315,11 +316,16 @@ export default function NuevoPerfilScreen() {
         notas: datos.notas?.trim() || undefined,
       });
 
+      // El perfil recién creado pasa a ser el activo: el resto de la app
+      // (rutina, informes, cuidador) debe operar sobre esta persona.
+      establecerPerfilActivo(creado.id);
       toast.exito('Perfil de cuidado guardado como borrador.');
       if (router.canGoBack()) router.back();
       else router.replace('/');
-    } catch {
-      /* El error lo comunica el banner global (QueryClient). */
+    } catch (error) {
+      // El motivo real (límite del plan, validación del servidor) se comunica
+      // aquí; el banner global queda como respaldo.
+      toast.errorDe(error, 'No hemos podido guardar el perfil. Inténtalo de nuevo.');
     }
   });
 

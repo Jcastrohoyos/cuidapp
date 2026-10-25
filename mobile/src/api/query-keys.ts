@@ -13,6 +13,7 @@ export const qk = {
   registros: (perfilId: string, fecha: string) => ['registros', perfilId, fecha] as const,
   incidencias: (perfilId: string) => ['incidencias', perfilId] as const,
   informe: (perfilId: string) => ['informes', perfilId] as const,
-  historial: (perfilId: string) => ['historial', perfilId] as const,
+  historial: (perfilId: string, opts?: { desde?: string; hasta?: string; limite?: number }) =>
+    ['historial', perfilId, opts ?? {}] as const,
   configCuidador: (perfilId: string) => ['configCuidador', perfilId] as const,
 };

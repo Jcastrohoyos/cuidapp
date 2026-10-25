@@ -21,6 +21,7 @@ import type {
   Familia,
   Incidencia,
   PerfilCuidado,
+  PerfilNuevo,
   RegistroHistorial,
   RegistroTarea,
   ServicioComplementario,
@@ -32,13 +33,15 @@ import { depurarDatosDePerfil } from '@/utils/perfiles';
 // v2: las semillas cambiaron para replicar la demo de la landing (2ª versión
 // de los datos de ejemplo); la clave nueva evita que la app cargue datos viejos.
 // v3: se añaden tareas "solo hoy" (repeticion) y la configuración del cuidador.
-const STORAGE_KEY = 'cuidapp.demo_data.v3';
+// v4: los registros cubren la semana en curso (informe de adherencia real).
+const STORAGE_KEY = 'cuidapp.demo_data.v4';
 
 const semillas = {
   familia: mocks.familiaDemo,
   perfiles: [mocks.perfilDemo],
   tareas: mocks.tareasDemo,
-  registros: mocks.registrosHoyDemo,
+  // La semana en curso, para que el informe de adherencia mida días reales.
+  registros: [...mocks.registrosSemanaDemo, ...mocks.registrosHoyDemo],
   incidencias: mocks.incidenciasDemo,
   servicios: mocks.serviciosDemo,
   historial: mocks.historialDemo,
@@ -46,8 +49,22 @@ const semillas = {
   configsCuidador: mocks.configCuidadorDemo,
 };
 
-/** Perfil a crear: el id es opcional (si no llega, lo genera el almacén). */
-type NuevoPerfil = Omit<PerfilCuidado, 'id' | 'actualizadoEn'> & { id?: string };
+/** Perfil a crear: los ids los asigna el almacén (si no llegan). */
+type NuevoPerfil = PerfilNuevo & { id?: string };
+
+/**
+ * Id único para lo que crea la familia.
+ *
+ * `Date.now()` a secas se repite cuando dos elementos se crean en el mismo
+ * milisegundo (la app registra varias tareas seguidas): dos registros con el
+ * mismo id hacen que el estado más reciente se pierda. El contador garantiza
+ * que dentro del mismo milisegundo los ids sigan siendo distintos y ordenables.
+ */
+let contadorIds = 0;
+function idUnico(prefijo: string): string {
+  contadorIds += 1;
+  return `${prefijo}_${Date.now()}_${String(contadorIds).padStart(4, '0')}`;
+}
 
 interface DataEstado {
   /* ---------- Cuenta familiar ---------- */
@@ -71,7 +88,8 @@ interface DataEstado {
 
   /* ---------- Perfiles ---------- */
   setPerfiles: (perfiles: PerfilCuidado[]) => void;
-  agregarPerfil: (perfil: NuevoPerfil) => void;
+  /** Crea el perfil, lo deja activo y lo devuelve (con su id asignado). */
+  agregarPerfil: (perfil: NuevoPerfil) => PerfilCuidado;
   actualizarPerfil: (id: string, cambios: Partial<PerfilCuidado>) => void;
   publicarPerfil: (id: string) => void;
   /** Quita a la persona a cargo y depura todo lo que cuelga de su perfil. */
@@ -90,7 +108,8 @@ interface DataEstado {
 
   /* ---------- Registros ---------- */
   setRegistros: (registros: RegistroTarea[]) => void;
-  agregarRegistro: (registro: Omit<RegistroTarea, 'id'>) => void;
+  /** Crea el registro y devuelve el ya persistido (con su id asignado). */
+  agregarRegistro: (registro: Omit<RegistroTarea, 'id'>) => RegistroTarea;
 
   /* ---------- Incidencias ---------- */
   setIncidencias: (incidencias: Incidencia[]) => void;
@@ -110,8 +129,6 @@ interface DataEstado {
 
   /* ---------- Utilidades ---------- */
   reiniciarDemo: () => void;
-  /** Perfil activo resuelto (el fijado, o el primero si no hay fijado). */
-  perfilActivo: PerfilCuidado | null;
 }
 
 export const useDataStore = create<DataEstado>()(
@@ -137,16 +154,23 @@ export const useDataStore = create<DataEstado>()(
       setPerfiles: (perfiles) => set({ perfiles }),
 
       agregarPerfil: (perfil) => {
+        const id = perfil.id ?? idUnico('per');
         const nuevo: PerfilCuidado = {
           ...perfil,
-          id: perfil.id ?? `per_${Date.now()}`,
+          id,
+          // La persona y su perfil comparten identificador: una misma persona
+          // no puede quedar registrada con dos ids distintos.
+          persona: { ...perfil.persona, id },
           estado: 'borrador',
           actualizadoEn: new Date().toISOString(),
         };
         set((state) => ({
           perfiles: [...state.perfiles, nuevo],
-          perfilActivoId: state.perfilActivoId ?? nuevo.id,
+          // El perfil recién creado pasa a ser el activo: la familia acaba de
+          // crearlo y va a trabajar sobre él.
+          perfilActivoId: nuevo.id,
         }));
+        return nuevo;
       },
 
       actualizarPerfil: (id, cambios) =>
@@ -181,24 +205,32 @@ export const useDataStore = create<DataEstado>()(
             state.candidatos.some((c) => c.candidatura.id === candidaturaId && c.candidatura.perfilId === p.id),
           );
           if (!perfil) return state;
+          const ahora = new Date().toISOString();
           return {
             perfiles: state.perfiles.map((p) =>
               p.id === perfil.id
-                ? { ...p, estado: 'con_cuidador', actualizadoEn: new Date().toISOString() }
+                ? { ...p, estado: 'con_cuidador', actualizadoEn: ahora }
                 : p,
             ),
-            candidatos: state.candidatos.map((c) =>
-              c.candidatura.id === candidaturaId
-                ? { ...c, candidatura: { ...c.candidatura, estado: 'seleccionada' } }
-                : c,
-            ),
+            candidatos: state.candidatos.map((c) => {
+              if (c.candidatura.id === candidaturaId) {
+                return { ...c, candidatura: { ...c.candidatura, estado: 'seleccionada' } };
+              }
+              // Un perfil solo puede tener una candidatura 'seleccionada': si la
+              // familia cambia de cuidador, la anterior pasa a 'rechazada'. Sin
+              // esto, "Mi cuidador" seguiría mostrando al cuidador anterior.
+              if (c.candidatura.perfilId === perfil.id && c.candidatura.estado === 'seleccionada') {
+                return { ...c, candidatura: { ...c.candidatura, estado: 'rechazada' } };
+              }
+              return c;
+            }),
           };
         }),
 
       /* ---------- Tareas ---------- */
       setTareas: (tareas) => set({ tareas }),
       agregarTarea: (tarea) => {
-        const nuevo: Tarea = { ...tarea, id: `tar_${Date.now()}` };
+        const nuevo: Tarea = { ...tarea, id: idUnico('tar') };
         set((state) => ({ tareas: [...state.tareas, nuevo] }));
         return nuevo;
       },
@@ -216,10 +248,11 @@ export const useDataStore = create<DataEstado>()(
       agregarRegistro: (registro) => {
         const nuevo: RegistroTarea = {
           ...registro,
-          id: `reg_${Date.now()}`,
+          id: idUnico('reg'),
           fecha: fechaHoy(),
         };
         set((state) => ({ registros: [...state.registros, nuevo] }));
+        return nuevo;
       },
 
       /* ---------- Incidencias ---------- */
@@ -227,7 +260,7 @@ export const useDataStore = create<DataEstado>()(
       agregarIncidencia: (incidencia) => {
         const nuevo: Incidencia = {
           ...incidencia,
-          id: `inc_${Date.now()}`,
+          id: idUnico('inc'),
           fecha: new Date().toISOString(),
           estado: 'abierta',
         };
@@ -239,7 +272,6 @@ export const useDataStore = create<DataEstado>()(
             i.id === id ? { ...i, estado: 'resuelta', resolucion } : i,
           ),
         })),
-
       /* ---------- Servicios ---------- */
       setServicios: (servicios) => set({ servicios }),
       contratarServicio: (id) =>
@@ -254,7 +286,7 @@ export const useDataStore = create<DataEstado>()(
       agregarHistorial: (registro) => {
         const nuevo: RegistroHistorial = {
           ...registro,
-          id: `his_${Date.now()}`,
+          id: idUnico('his'),
           fecha: new Date().toISOString(),
         };
         set((state) => ({ historial: [...state.historial, nuevo] }));
@@ -264,14 +296,7 @@ export const useDataStore = create<DataEstado>()(
       establecerPerfilActivo: (id) => set({ perfilActivoId: id }),
 
       /* ---------- Utilidades ---------- */
-      reiniciarDemo: () => set(semillas as Partial<DataEstado>),
-
-      /** Perfil activo resuelto */
-      get perfilActivo() {
-        const { perfiles, perfilActivoId } = get();
-        const id = perfilActivoId ?? perfiles[0]?.id ?? null;
-        return perfiles.find((p) => p.id === id) ?? null;
-      },
+      reiniciarDemo: () => set({ ...semillas, perfilActivoId: null } as Partial<DataEstado>),
     }),
     {
       name: STORAGE_KEY,

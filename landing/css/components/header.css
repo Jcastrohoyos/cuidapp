@@ -25,6 +25,7 @@
 
 .site-header__inner {
   height: var(--header-h);
+  max-width: 80rem;
   display: flex;
   align-items: center;
   gap: var(--space-6);
@@ -74,6 +75,7 @@
 .nav__link {
   position: relative;
   display: block;
+  white-space: nowrap;
   padding: var(--space-2) var(--space-3);
   border-radius: var(--radius-sm);
   font-size: var(--text-sm);
@@ -180,7 +182,17 @@
 .mobile-nav .btn { margin-bottom: var(--space-5); }
 
 /* --- Responsive --- */
-@media (max-width: 60rem) {
+@media (max-width: 80rem) {
+  .nav__link {
+    padding-inline: var(--space-2);
+    font-size: 0.8125rem;
+  }
+}
+
+/* Con siete secciones en la navegación, la barra completa deja de caber
+   en pantallas medianas: se colapsa en el menú desplegable, que incluye
+   el acceso anticipado. */
+@media (max-width: 78rem) {
   .nav,
   .site-header__actions .btn { display: none; }
 

@@ -5,17 +5,11 @@
  * —el mismo principio de "nada inventado" que la afinidad— y es puro para
  * poder probarse sin UI.
  */
+import { FRANJAS_TEXTO } from '@/constants/textos';
 import type { Cuidador, FranjaDisponibilidad, TipoVerificacion } from '@/types';
 
 /** Valoración media mínima del chip «+4,5» de la demo. */
 export const UMBRAL_VALORACION_BUSCADA = 4.5;
-
-/** Etiquetas de franja (mismo mapa que muestra las preferencias en Perfil). */
-const FRANJAS_TEXTO: Record<FranjaDisponibilidad, string> = {
-  manana: 'mañanas',
-  tarde: 'tardes',
-  noche: 'noches',
-};
 
 export interface CriteriosBusqueda {
   /** Texto libre: nombre, biografía o competencias (ignora acentos y mayúsculas). */
@@ -31,6 +25,8 @@ export interface CriteriosBusqueda {
   verificacionesMinimas: TipoVerificacion[];
   /** Chip «+4,5»: exige esa valoración media mínima. */
   mejorValorados: boolean;
+  /** Presupuesto de la familia: descarta a quien cobre más por hora. */
+  tarifaMaxHora?: number;
 }
 
 /** Marcas combinantes Unicode (resultado de `normalize('NFD')`): se eliminan. */
@@ -92,6 +88,16 @@ export function filtrarCuidadores(
     }
 
     if (criterios.mejorValorados && (cuidador.valoracion ?? 0) < UMBRAL_VALORACION_BUSCADA) {
+      return false;
+    }
+
+    // Presupuesto de la familia: sin tarifa publicada no se excluye (no se
+    // inventa), pero si la hay y supera el máximo pactado, no encaja.
+    if (
+      criterios.tarifaMaxHora != null &&
+      cuidador.tarifaHora != null &&
+      cuidador.tarifaHora > criterios.tarifaMaxHora
+    ) {
       return false;
     }
 

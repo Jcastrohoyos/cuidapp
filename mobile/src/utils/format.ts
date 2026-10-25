@@ -56,9 +56,35 @@ export function iniciales(nombre: string): string {
     .join('');
 }
 
-/** Horario legible: "Lun–Vie · 09:00–13:00". */
+/** Etiquetas de día para el horario: "Lun–Vie", "Sáb–Dom", "L · X · V". */
+const DIAS_CORTOS: Record<string, string> = {
+  lunes: 'Lun',
+  martes: 'Mar',
+  miercoles: 'Mié',
+  jueves: 'Jue',
+  viernes: 'Vie',
+  sabado: 'Sáb',
+  domingo: 'Dom',
+};
+
+const DIAS_LABORABLES = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
+const DIAS_FIN_DE_SEMANA = ['sabado', 'domingo'];
+
+/**
+ * Horario legible: "Lun–Vie · 09:00–13:00".
+ * Los días se nombran ("no 5 días"): la familia entiende mejor los nombres
+ * que una cuenta.
+ */
 export function formatearHorario(dias: string[], desde: string, hasta: string): string {
   if (dias.length === 0) return `${desde}–${hasta}`;
   if (dias.length === 7) return `Todos los días · ${desde}–${hasta}`;
-  return `${dias.length} días · ${desde}–${hasta}`;
+  const conjunto = new Set(dias);
+  if (dias.length === 5 && DIAS_LABORABLES.every((dia) => conjunto.has(dia))) {
+    return `Lun–Vie · ${desde}–${hasta}`;
+  }
+  if (dias.length === 2 && DIAS_FIN_DE_SEMANA.every((dia) => conjunto.has(dia))) {
+    return `Sáb–Dom · ${desde}–${hasta}`;
+  }
+  const etiquetas = dias.map((dia) => DIAS_CORTOS[dia] ?? dia);
+  return `${etiquetas.join(' · ')} · ${desde}–${hasta}`;
 }

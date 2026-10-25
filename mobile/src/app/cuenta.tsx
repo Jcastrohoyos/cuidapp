@@ -20,20 +20,16 @@ import { useTheme } from '@/hooks/use-theme';
 import { useToast } from '@/hooks/use-toast';
 import { confirmar } from '@/utils/confirmar';
 import { fam, Spacing } from '@/constants/theme';
+import { FRANJAS_OPCION, TEXTOS_VERIFICACION } from '@/constants/textos';
 import type { FranjaDisponibilidad, MiembroFamilia, TipoVerificacion } from '@/types';
 
-const FRANJAS: { valor: FranjaDisponibilidad; texto: string }[] = [
-  { valor: 'manana', texto: 'Mañanas' },
-  { valor: 'tarde', texto: 'Tardes' },
-  { valor: 'noche', texto: 'Noches' },
-];
+const FRANJAS: { valor: FranjaDisponibilidad; texto: string }[] = (
+  ['manana', 'tarde', 'noche'] as FranjaDisponibilidad[]
+).map((valor) => ({ valor, texto: FRANJAS_OPCION[valor] }));
 
-const VERIFICACIONES: { valor: TipoVerificacion; texto: string }[] = [
-  { valor: 'identidad', texto: 'Identidad' },
-  { valor: 'formacion', texto: 'Formación' },
-  { valor: 'penales', texto: 'Antecedentes' },
-  { valor: 'referencias', texto: 'Referencias' },
-];
+const VERIFICACIONES: { valor: TipoVerificacion; texto: string }[] = (
+  ['identidad', 'formacion', 'penales', 'referencias'] as TipoVerificacion[]
+).map((valor) => ({ valor, texto: TEXTOS_VERIFICACION[valor] }));
 
 const esquema = z.object({
   nombre: z.string().min(2, { message: 'Indica el nombre de la cuenta.' }),
@@ -156,7 +152,10 @@ export default function CuentaScreen() {
       },
     });
     toast.exito('Datos de la familia guardados en este dispositivo.');
-    router.back();
+    // La pantalla puede abrirse por URL directa (sin historial): `router.back()`
+    // dejaría a la familia atrapada en un aviso de React Navigation.
+    if (router.canGoBack()) router.back();
+    else router.replace('/perfil');
   });
 
   return (

@@ -21,6 +21,17 @@
   onScroll();
 
   /* ------------------------------------------------------------
+     1b. Botón volver arriba
+     ------------------------------------------------------------ */
+  const backToTop = $("#back-to-top");
+  if (backToTop) {
+    const toggleBack = () => backToTop.classList.toggle("is-visible", window.scrollY > 400);
+    window.addEventListener("scroll", toggleBack, { passive: true });
+    toggleBack();
+    backToTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+  }
+
+  /* ------------------------------------------------------------
      2. Menú móvil
      ------------------------------------------------------------ */
   const menuToggle = $("#menu-toggle");
@@ -48,7 +59,7 @@
   });
 
   window.addEventListener("resize", () => {
-    if (window.innerWidth > 960) setMenu(false);
+    if (window.innerWidth > 1248) setMenu(false);
   });
 
   /* ------------------------------------------------------------
@@ -317,7 +328,7 @@
   // El progreso de las rutinas (pantallas 06 y demo) lo gestiona initRoutine.
 
   /* ------------------------------------------------------------
-      8. Formulario de acceso anticipado
+      10. Formulario de acceso anticipado
       ------------------------------------------------------------ */
   const form = $("#cta-form");
   const success = $("#form-success");
@@ -341,4 +352,110 @@
     $("#email", form).style.borderColor = "";
     if (!success.hidden) success.hidden = true;
   });
+
+  /* ------------------------------------------------------------
+     9. CRM familiar · envío del cuidador y panel de registros
+     ------------------------------------------------------------ */
+  const crmEnviar = $("#crm-enviar");
+  const crmPacientes = $("#crm-pacientes");
+  const crmStatTotal = $("#crm-stat-total");
+  const crmStatActivos = $("#crm-stat-activos");
+  const crmStatPendientes = $("#crm-stat-pendientes");
+  const CRM_KEY = "cuidapp-crm-registros";
+
+  const urgenciaStatus = (u) => u === "alta" ? "revision" : u === "media" ? "pendiente" : "activo";
+  const urgenciaLabel = (u) => u === "alta" ? "Revisión" : u === "media" ? "Pendiente" : "Activo";
+  const urgenciaClass = (s) => `crm__status--${s}`;
+
+  let registros = [];
+  try {
+    const stored = localStorage.getItem(CRM_KEY);
+    if (stored) registros = JSON.parse(stored);
+  } catch (e) { /* ignora */ }
+
+  const renderCRM = () => {
+    if (!crmPacientes) return;
+    crmPacientes.innerHTML = "";
+
+    if (registros.length === 0) {
+      crmPacientes.innerHTML =
+        '<div class="crm__empty">' +
+        '<svg class="icon" aria-hidden="true"><use href="#i-clipboard"></use></svg>' +
+        '<p>Sin registros todavía. Envía el primer dato desde el formulario.</p>' +
+        "</div>";
+    } else {
+      registros.slice().reverse().forEach((r, i) => {
+        const status = urgenciaStatus(r.urgencia);
+        const el = document.createElement("div");
+        el.className = `crm__patient crm__patient--new`;
+        el.style.setProperty("--crm-delay", `${i * 80}ms`);
+        el.innerHTML =
+          '<span class="crm__avatar">' + r.iniciales + "</span>" +
+          '<div class="crm__patient__info">' +
+          '<p class="crm__patient__name">' + escapeHtml(r.cuidador) + " · " + escapeHtml(r.paciente) + "</p>" +
+          '<p class="crm__patient__role">' + r.atencion + "</p>" +
+          "</div>" +
+          '<div class="crm__patient__meta">' +
+          '<strong>' + r.fecha + "</strong>" +
+          '<span>Turno · ' + r.urgencia.toLowerCase() + "</span>" +
+          "</div>" +
+          '<span class="crm__status ' + urgenciaClass(status) + '">' + urgenciaLabel(r.urgencia) + "</span>";
+        crmPacientes.appendChild(el);
+      });
+    }
+
+    if (crmStatTotal) crmStatTotal.textContent = registros.length;
+    if (crmStatActivos) crmStatActivos.textContent = registros.filter(r => urgenciaStatus(r.urgencia) === "activo").length;
+    if (crmStatPendientes) crmStatPendientes.textContent = registros.filter(r => urgenciaStatus(r.urgencia) !== "activo").length;
+  };
+
+  const escapeHtml = (t) => {
+    const d = document.createElement("div");
+    d.textContent = t;
+    return d.innerHTML;
+  };
+
+  const iniciales = (n) => n.split(" ").map(p => p[0]).join("").toUpperCase().slice(0, 2) || "??";
+
+  if (crmEnviar) {
+    crmEnviar.addEventListener("click", () => {
+      const cuidador = $("#crm-cuidador");
+      const paciente = $("#crm-paciente");
+      const atencion = $("#crm-atencion");
+      const fecha = $("#crm-fecha");
+      const observaciones = $("#crm-observaciones");
+      const urgencia = $("#crm-urgencia");
+
+      if (!cuidador.value || !paciente.value || !atencion.value || !fecha.value || !urgencia.value) {
+        [cuidador, paciente, atencion, fecha, urgencia].forEach((f) => {
+          if (!f.value) f.style.borderColor = "var(--accent-500)";
+        });
+        return;
+      }
+
+      const registro = {
+        id: Date.now(),
+        cuidador: cuidador.value.trim(),
+        paciente: paciente.value.trim(),
+        atencion: atencion.value,
+        fecha: new Date(fecha.value).toLocaleString("es-ES", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }),
+        observaciones: observaciones.value.trim(),
+        urgencia: urgencia.value,
+        creado: Date.now(),
+      };
+
+      registros.unshift(registro);
+      try { localStorage.setItem(CRM_KEY, JSON.stringify(registros)); } catch (e) { /* ignora */ }
+
+      [cuidador, paciente, atencion, fecha, observaciones, urgencia].forEach((f) => {
+        f.style.borderColor = "";
+        if (f.tagName === "TEXTAREA" || f.tagName === "INPUT") f.value = "";
+        if (f.tagName === "SELECT") f.selectedIndex = 0;
+      });
+
+      renderCRM();
+    });
+  }
+
+  renderCRM();
 })();

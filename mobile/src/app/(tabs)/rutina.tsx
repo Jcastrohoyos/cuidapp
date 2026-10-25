@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { Text } from '@/components/text';
 
 import { Badge } from '@/components/ui/badge';
@@ -20,12 +20,20 @@ import { useTheme } from '@/hooks/use-theme';
 import { confirmar } from '@/utils/confirmar';
 import { fechaHoy, porcentaje, tiempoRelativo } from '@/utils/format';
 import { fam, FontSize, Spacing } from '@/constants/theme';
+import { useOnboarding, ONBOARDING_KEYS } from '@/hooks/use-onboarding';
+import { Tooltip } from '@/components/ui/tooltip';
+import { useRef } from 'react';
 
 export default function RutinaScreen() {
   const theme = useTheme();
   const { perfil, isLoading, esError, refetch } = usePerfilActivo();
   const hoy = fechaHoy();
   const rutina = useRutina(perfil?.id ?? '', hoy);
+  const { yaVisto, marcarVisto } = useOnboarding();
+
+  // Refs para tooltips
+  const refAnadir = useRef<React.ElementRef<typeof Pressable>>(null);
+  const refToggle = useRef<React.ElementRef<typeof Pressable>>(null);
 
   const cabecera = (
     <ScreenHeader
@@ -104,7 +112,20 @@ export default function RutinaScreen() {
         />
       </Card>
 
-      <SectionHeader titulo="Tareas de hoy" />
+      <View ref={refToggle}>
+        <SectionHeader titulo="Tareas de hoy" />
+      </View>
+
+      {!yaVisto(ONBOARDING_KEYS.RUTINA_TOGGLE) && (
+        <Tooltip
+          clave={ONBOARDING_KEYS.RUTINA_TOGGLE}
+          targetRef={refToggle}
+          texto="Toca cualquier tarea para marcarla como realizada o pendiente."
+          posicion="abajo"
+          onDescartar={() => marcarVisto(ONBOARDING_KEYS.RUTINA_TOGGLE)}
+          mostrarContinuar
+        />
+      )}
       <View style={styles.lista}>
         {tareas.map((tarea) => (
           <TareaItem
@@ -143,11 +164,23 @@ export default function RutinaScreen() {
       </View>
 
       <Button
+        ref={refAnadir}
         titulo="+ Añadir a la rutina"
         variante="secondary"
         fullWidth
         onPress={() => router.push('/rutina/nueva')}
       />
+
+      {!yaVisto(ONBOARDING_KEYS.RUTINA_ANADIR) && (
+        <Tooltip
+          clave={ONBOARDING_KEYS.RUTINA_ANADIR}
+          targetRef={refAnadir}
+          texto="Añade tareas nuevas a la rutina: diarias o solo para hoy, con su hora."
+          posicion="arriba"
+          onDescartar={() => marcarVisto(ONBOARDING_KEYS.RUTINA_ANADIR)}
+          mostrarContinuar
+        />
+      )}
 
       <SectionHeader titulo="Incidencias" />
       {abiertas.length === 0 ? (

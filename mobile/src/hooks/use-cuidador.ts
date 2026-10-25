@@ -16,8 +16,14 @@ interface Seleccionado {
 /** Cuidador seleccionado de un perfil (la candidatura en estado 'seleccionada'). */
 export function useMiCuidador(perfilId: string): Seleccionado {
   const candidatos = useCandidatos(perfilId);
-  const seleccionado =
-    (candidatos.data ?? []).find((c) => c.candidatura.estado === 'seleccionada') ?? null;
+  // Solo puede haber una candidatura 'seleccionada' por perfil (el almacén
+  // degrada la anterior a 'rechazada' al cambiar de cuidador). Se toma la
+  // última por si quedara alguna antigua en datos ya guardados en el
+  // dispositivo, para no mostrar a un cuidador al que ya se renunció.
+  const seleccionadas = (candidatos.data ?? []).filter(
+    (c) => c.candidatura.estado === 'seleccionada',
+  );
+  const seleccionado = seleccionadas.length > 0 ? seleccionadas[seleccionadas.length - 1] : null;
   return {
     cuidador: seleccionado?.cuidador ?? null,
     candidatura: seleccionado?.candidatura ?? null,

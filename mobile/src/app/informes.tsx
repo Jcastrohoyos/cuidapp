@@ -1,8 +1,11 @@
 import { router } from 'expo-router';
+import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { CampoTexto } from '@/components/ui/field';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
 import { ProgressBar } from '@/components/ui/progress-bar';
@@ -14,22 +17,52 @@ import { Stat } from '@/components/ui/stat';
 import { ThemedText } from '@/components/themed-text';
 import { useHistorial, useInforme } from '@/hooks/use-informes';
 import { usePerfilActivo } from '@/hooks/use-perfiles';
-import { useRutina } from '@/hooks/use-rutina';
-import { fechaHoy, formatearFechaHora, porcentaje } from '@/utils/format';
+import { useResolverIncidencia } from '@/hooks/use-rutina';
+import { useToast } from '@/hooks/use-toast';
+import { formatearFechaHora, porcentaje } from '@/utils/format';
+import { decimalEs, etiquetaSemana } from '@/utils/adherencia';
 import { Radius, Spacing } from '@/constants/theme';
 
 export default function InformesScreen() {
   const { perfil, isLoading, esError, refetch } = usePerfilActivo();
-  const hoy = fechaHoy();
+  const toast = useToast();
   const informe = useInforme(perfil?.id ?? '');
   const historial = useHistorial(perfil?.id ?? '', { limite: 20 });
-  const rutina = useRutina(perfil?.id ?? '', hoy);
+  const resolverIncidencia = useResolverIncidencia(perfil?.id ?? '');
+  // Incidencia que se está resolviendo ahora (una a la vez).
+  const [resolucionAbierta, setResolucionAbierta] = useState<string | null>(null);
+  const [textoResolucion, setTextoResolucion] = useState('');
 
+  const guardarResolucion = (incidenciaId: string) => {
+    const texto = textoResolucion.trim();
+    if (!texto) {
+      toast.error('Escribe cómo se resolvió antes de guardar.');
+      return;
+    }
+    resolverIncidencia.mutate(
+      { incidenciaId, resolucion: texto },
+      {
+        onSuccess: () => {
+          setResolucionAbierta(null);
+          setTextoResolucion('');
+          toast.exito('Incidencia resuelta.');
+        },
+        onError: () =>
+          toast.error('No hemos podido resolver la incidencia. Inténtalo de nuevo.'),
+      },
+    );
+  };
+
+  const periodo = informe.data?.periodo;
   const cabecera = (
     <ScreenHeader
       variante="atras"
       titulo="Informes"
-      subtitulo={perfil ? `${perfil.persona.nombre} · semana en curso` : undefined}
+      subtitulo={
+        perfil
+          ? `${perfil.persona.nombre}${periodo ? ` · ${etiquetaSemana(periodo.desde, periodo.hasta)}` : ''}`
+          : undefined
+      }
     />
   );
 
@@ -87,18 +120,15 @@ export default function InformesScreen() {
   const datos = informe.data;
   const registros = historial.data ?? [];
 
-  const adherencia = rutina.tareas.map((t) => ({
-    nombre: t.nombre,
-    valor: rutina.estadoTarea(t.id) === 'realizada' ? 100 : 0,
-    detalle: rutina.estadoTarea(t.id) === 'realizada' ? '1/1' : '0/1',
-  }));
+  // Adherencia por rutina: realizadas / programadas dentro de la semana. El
+  // porcentaje y la fracción salen de los mismos datos registrados.
+  const adherencia = datos?.adherencia ?? [];
 
   return (
     <Screen
       alRefrescar={() => {
         void informe.refetch();
         void historial.refetch();
-        rutina.refetch();
       }}>
       {cabecera}
 
@@ -109,8 +139,8 @@ export default function InformesScreen() {
         />
         <Stat valor={datos ? String(datos.incidencias.length) : '—'} etiqueta="incidencias" />
         <Stat
-          valor={datos?.valoracion ? datos.valoracion.toFixed(1).replace('.', ',') : '—'}
-          etiqueta="valoración del servicio"
+          valor={datos?.valoracion != null ? decimalEs(datos.valoracion) : '—'}
+          etiqueta="valoración del cuidador"
         />
       </View>
 
@@ -119,7 +149,7 @@ export default function InformesScreen() {
         <View style={styles.adherencia}>
           {adherencia.length > 0 ? (
             adherencia.map((ruta) => (
-              <View key={ruta.nombre} style={styles.filaAdherencia}>
+              <View key={ruta.tareaId} style={styles.filaAdherencia}>
                 <ThemedText
                   type="small"
                   themeColor="textSecondary"
@@ -129,16 +159,16 @@ export default function InformesScreen() {
                   {ruta.nombre}
                 </ThemedText>
                 <View style={styles.barra}>
-                  <ProgressBar valor={ruta.valor} />
+                  <ProgressBar valor={porcentaje(ruta.realizadas, ruta.programadas)} />
                 </View>
                 <ThemedText type="smallBold" style={styles.detalle}>
-                  {ruta.detalle}
+                  {ruta.realizadas}/{ruta.programadas}
                 </ThemedText>
               </View>
             ))
           ) : (
             <ThemedText type="small" themeColor="textSecondary">
-              Sin tareas con registros hoy.
+              Sin tareas en la rutina de esta persona.
             </ThemedText>
           )}
         </View>
@@ -179,18 +209,62 @@ export default function InformesScreen() {
                   {incidencia.resolucion}
                 </ThemedText>
               ) : null}
+              {resolucionAbierta === incidencia.id ? (
+                <CampoTexto
+                  label="Cómo se resolvió"
+                  valor={textoResolucion}
+                  onChangeTexto={setTextoResolucion}
+                  placeholder="Escribe el resultado (ej. se resolvió con la fisioterapia)"
+                />
+              ) : null}
             </View>
-            <Badge
-              texto={incidencia.estado === 'resuelta' ? 'Resuelta' : 'Abierta'}
-              tono={incidencia.estado === 'resuelta' ? 'success' : 'warning'}
-            />
+            <View style={styles.columnaDerecha}>
+              <Badge
+                texto={incidencia.estado === 'resuelta' ? 'Resuelta' : 'Abierta'}
+                tono={incidencia.estado === 'resuelta' ? 'success' : 'warning'}
+              />
+              {incidencia.estado !== 'resuelta' ? (
+                resolucionAbierta === incidencia.id ? (
+                  <View style={styles.acciones}>
+                    <Button
+                      titulo="Guardar"
+                      tamano="sm"
+                      cargando={resolverIncidencia.isPending}
+                      onPress={() => guardarResolucion(incidencia.id)}
+                    />
+                    <Button
+                      titulo="Cancelar"
+                      variante="secondary"
+                      tamano="sm"
+                      onPress={() => setResolucionAbierta(null)}
+                    />
+                  </View>
+                ) : (
+                  <Button
+                    titulo="Resolver"
+                    variante="secondary"
+                    tamano="sm"
+                    onPress={() => {
+                      setResolucionAbierta(incidencia.id);
+                      setTextoResolucion('');
+                    }}
+                  />
+                )
+              ) : null}
+            </View>
           </Card>
         ))}
+        {(datos?.incidencias ?? []).length === 0 ? (
+          <ThemedText type="small" themeColor="textSecondary">
+            Sin incidencias registradas en esta semana.
+          </ThemedText>
+        ) : null}
       </View>
 
       <ThemedText type="small" themeColor="textSecondary" style={styles.nota}>
-        Historial organizado por fecha, responsable y estado ({hoy}). Información útil para decidir
-        con continuidad.
+        Historial organizado por fecha, responsable y estado
+        {periodo ? ` (${etiquetaSemana(periodo.desde, periodo.hasta).toLowerCase()})` : ''}.
+        Información útil para decidir con continuidad.
       </ThemedText>
     </Screen>
   );
@@ -225,7 +299,8 @@ const styles = StyleSheet.create({
     minWidth: 40,
   },
   detalle: {
-    width: 40,
+    // Ancho suficiente para la fracción "19/21" sin partirla.
+    width: 52,
     textAlign: 'right',
   },
   registros: {
@@ -234,6 +309,13 @@ const styles = StyleSheet.create({
   flex: {
     flex: 1,
     gap: 2,
+  },
+  columnaDerecha: {
+    alignItems: 'flex-end',
+    gap: Spacing.two,
+  },
+  acciones: {
+    gap: Spacing.one,
   },
   nota: {
     lineHeight: 18,

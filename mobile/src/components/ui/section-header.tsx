@@ -25,8 +25,9 @@ export function SectionHeader({ titulo, accion, children }: SectionHeaderProps) 
           accessibilityRole="button"
           onPress={accion.onPress}
           hitSlop={12}
+          style={styles.accion}
           accessibilityLabel={accion.texto}>
-          <Text style={[styles.accion, { color: theme.primary }]}>{accion.texto}</Text>
+          <Text style={[styles.accionTexto, { color: theme.primary }]}>{accion.texto}</Text>
         </Pressable>
       ) : null}
     </View>
@@ -50,6 +51,11 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   accion: {
+    // Objetivo táctil mínimo de 44 pt (WCAG 2.5.8 / Material).
+    minHeight: 44,
+    justifyContent: 'center',
+  },
+  accionTexto: {
     fontFamily: fam(700),
     fontSize: FontSize.sm,
     fontWeight: '700',

@@ -238,3 +238,7 @@
   from { opacity: 0; transform: translateY(14px); filter: blur(4px); }
   to { opacity: 1; transform: none; filter: blur(0); }
 }
+
+/* --- Reset para secciones sin .slide --- */
+section:not(.slide) > .slide__content { position: static; inset: auto; background: none; overflow: visible; animation: none; transform: none; }
+section:not(.slide) > .slide__content > .slide__inner { max-height: none; padding-inline: var(--container-x); }

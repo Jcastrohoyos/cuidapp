@@ -157,4 +157,28 @@ describe('filtrarCuidadores', () => {
     // Laura y Marta declaran Diabetes y están a menos de 6 km.
     expect(ids(resultado)).toEqual(['cui_1', 'cui_2']);
   });
+
+  it('el presupuesto de la familia descarta a quien cobre más por hora', () => {
+    const resultado = filtrarCuidadores(TODOS, criterios({ tarifaMaxHora: 11 }));
+    // Laura cobra 12 €/h: se queda Marta (11) y Carlos (10).
+    expect(ids(resultado)).toEqual(['cui_2', 'cui_3']);
+  });
+
+  it('el presupuesto con tope igual a la tarifa lo incluye', () => {
+    expect(ids(filtrarCuidadores(TODOS, criterios({ tarifaMaxHora: 12 })))).toEqual([
+      'cui_1',
+      'cui_2',
+      'cui_3',
+    ]);
+  });
+
+  it('sin tarifa publicada el presupuesto no descarta (nada inventado)', () => {
+    const sinTarifa: Cuidador = { ...CARLOS, tarifaHora: undefined };
+    const resultado = filtrarCuidadores([sinTarifa], criterios({ tarifaMaxHora: 5 }));
+    expect(resultado).toHaveLength(1);
+  });
+
+  it('sin presupuesto definido el filtro de tarifa no descarta a nadie', () => {
+    expect(filtrarCuidadores(TODOS, criterios())).toHaveLength(3);
+  });
 });

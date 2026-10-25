@@ -1,44 +1,45 @@
 import { router } from 'expo-router';
-import { StyleSheet, Switch, View } from 'react-native';
+import { Pressable, StyleSheet, Switch, View } from 'react-native';
 
 import { Avatar } from '@/components/ui/avatar';
-import { Badge, badgeEstadoPerfil } from '@/components/ui/badge';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
+import { Loading } from '@/components/ui/loading';
+import { TarjetaPerfil } from '@/components/ui/profile-card';
 import { ErrorState } from '@/components/ui/error-state';
 import { Screen } from '@/components/ui/screen';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { SectionHeader } from '@/components/ui/section-header';
 import { useTextoGrande } from '@/components/text';
 import { ThemedText } from '@/components/themed-text';
-import { useAuth, useSesion } from '@/hooks/use-auth';
+import { useAuth } from '@/hooks/use-auth';
 import { usePerfiles } from '@/hooks/use-perfiles';
 import { useToast } from '@/hooks/use-toast';
 import { useTheme } from '@/hooks/use-theme';
+import { useOnboarding, ONBOARDING_KEYS } from '@/hooks/use-onboarding';
+import { Tooltip } from '@/components/ui/tooltip';
 import { useDataStore } from '@/store/data-store';
 import { USAR_MOCKS } from '@/api/client';
 import { confirmar } from '@/utils/confirmar';
-import { calcularEdad } from '@/utils/format';
 import { Spacing } from '@/constants/theme';
-import type { FranjaDisponibilidad } from '@/types';
-
-const FRANJAS_TEXTO: Record<FranjaDisponibilidad, string> = {
-  manana: 'mañanas',
-  tarde: 'tardes',
-  noche: 'noches',
-};
+import { FRANJAS_TEXTO } from '@/constants/textos';
+import { useRef } from 'react';
 
 export default function PerfilScreen() {
-  const sesion = useSesion();
   const toast = useToast();
+  const { yaVisto, marcarVisto } = useOnboarding();
   const { cerrarSesion } = useAuth();
-  const { data: perfiles, isError, refetch } = usePerfiles();
+  const { data: perfiles, isLoading, isError, refetch } = usePerfiles();
   // Copia local persistida (AsyncStorage): se edita en /cuenta y sobrevive a reinicios.
-  const familiaLocal = useDataStore((estado) => estado.familia);
-  const familia = familiaLocal ?? sesion?.familia;
+  // Al iniciar sesión se sincroniza con la cuenta con la que se entra.
+  const familia = useDataStore((estado) => estado.familia);
   const theme = useTheme();
   const { textoGrande, setTextoGrande } = useTextoGrande();
+
+  // Ref para tooltip de ayuda
+  const refAyuda = useRef<React.ElementRef<typeof Pressable>>(null);
 
   const confirmarSalir = () => {
     confirmar(
@@ -49,9 +50,30 @@ export default function PerfilScreen() {
         destructiva: true,
       },
       () => {
-        void cerrarSesion().then(() => router.replace('/(auth)/login'));
+        // Si el cierre falla (almacén del token inaccesible) la familia debe
+        // saberlo: sin aviso, el botón parecería no hacer nada.
+        void cerrarSesion()
+          .then(() => router.replace('/(auth)/login'))
+          .catch(() =>
+            toast.error('No hemos podido cerrar la sesión. Inténtalo de nuevo en un momento.'),
+          );
       },
     );
+  };
+
+  // El plan marca cuántos perfiles de cuidado se pueden gestionar: si se llega
+  // al máximo, se explica en lugar de dejar crear uno más sin avisar.
+  const maxPerfiles = familia?.perfilesMaximos ?? 1;
+  const alLimite = (perfiles?.length ?? 0) >= maxPerfiles;
+  const nuevoPerfil = () => {
+    if (alLimite) {
+      toast.info(
+        `Tu plan incluye ${maxPerfiles} ${maxPerfiles === 1 ? 'perfil de cuidado' : 'perfiles de cuidado'}. ` +
+          'Amplía tu plan para gestionar más personas desde la misma cuenta.',
+      );
+      return;
+    }
+    router.push('/cuidado/nuevo');
   };
 
   return (
@@ -110,7 +132,7 @@ export default function PerfilScreen() {
 
       <SectionHeader
         titulo="Perfiles de cuidado"
-        accion={{ texto: '+ Nuevo', onPress: () => router.push('/cuidado/nuevo') }}
+        accion={{ texto: '+ Nuevo', onPress: nuevoPerfil }}
       />
       <View style={styles.lista}>
         {isError ? (
@@ -118,30 +140,23 @@ export default function PerfilScreen() {
             titulo="No hemos podido cargar tus perfiles"
             accion={{ texto: 'Reintentar', onPress: () => void refetch() }}
           />
+        ) : isLoading ? (
+          // Mientras se cargan no se anuncia "sin perfiles": la familia vería
+          // un vacío que no es real.
+          <Loading mensaje="Cargando perfiles…" />
         ) : (
           (perfiles ?? []).map((perfil) => (
-          <Card
-            key={perfil.id}
-            row
-            accessibilityHint={`Abre el perfil de cuidado de ${perfil.persona.nombre}`}
-            onPress={() => router.push({ pathname: '/cuidado/[id]', params: { id: perfil.id } })}>
-            <Avatar nombre={perfil.persona.nombre} />
-            <View style={styles.flex}>
-              <ThemedText type="smallBold">
-                {perfil.persona.nombre}
-                {perfil.persona.fechaNacimiento
-                  ? `, ${calcularEdad(perfil.persona.fechaNacimiento)} años`
-                  : ''}
-              </ThemedText>
-              <ThemedText type="small" themeColor="textSecondary">
-                {perfil.ubicacion.zona}, {perfil.ubicacion.ciudad}
-              </ThemedText>
-            </View>
-            <Badge {...badgeEstadoPerfil(perfil.estado)} />
-          </Card>
-        ))
+            <TarjetaPerfil
+              key={perfil.id}
+              perfil={perfil}
+              accessibilityHint={`Abre el perfil de cuidado de ${perfil.persona.nombre}`}
+              onPress={() =>
+                router.push({ pathname: '/cuidado/[id]', params: { id: perfil.id } })
+              }
+            />
+          ))
         )}
-        {!isError && (perfiles ?? []).length === 0 ? (
+        {!isError && !isLoading && (perfiles ?? []).length === 0 ? (
           <EmptyState
             titulo="Sin perfiles de cuidado"
             descripcion="Crea un perfil para organizar la rutina, publicar la oferta y seguir el informe diario."
@@ -189,10 +204,22 @@ export default function PerfilScreen() {
       ) : null}
 
       <Button
+        ref={refAyuda}
         titulo="Cómo funciona Cuidapp"
         variante="secondary"
         onPress={() => router.push('/ayuda')}
       />
+
+      {!yaVisto(ONBOARDING_KEYS.PERFIL_AYUDA) && (
+        <Tooltip
+          clave={ONBOARDING_KEYS.PERFIL_AYUDA}
+          targetRef={refAyuda}
+          texto="Aquí tienes el tutorial paso a paso de 7 pasos con consejos útiles."
+          posicion="arriba"
+          onDescartar={() => marcarVisto(ONBOARDING_KEYS.PERFIL_AYUDA)}
+          mostrarContinuar
+        />
+      )}
 
       <Button titulo="Cerrar sesión" variante="danger" onPress={confirmarSalir} />
     </Screen>

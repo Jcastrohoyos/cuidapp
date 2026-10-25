@@ -7,13 +7,14 @@
  * EXPO_PUBLIC_API_URL.
  */
 
+import { addDays, format, isBefore, startOfToday, startOfWeek } from 'date-fns';
+
 import type {
   CandidatoComparado,
   ConfigCuidador,
   Cuidador,
   Familia,
   Incidencia,
-  Informe,
   PerfilCuidado,
   PermisosCuidador,
   RegistroHistorial,
@@ -327,6 +328,38 @@ export const registrosHoyDemo: RegistroTarea[] = [
   { id: 'reg_5', tareaId: 'tar_5', fecha: hoy, estado: 'pendiente', responsableId: 'cui_3' },
 ];
 
+/**
+ * Registros de los días ya transcurridos de la semana en curso.
+ *
+ * Sin ellos, el informe de adherencia solo tendría el día de hoy y las cifras
+ * serían engañosas (1/5 en lugar de la semana real). Los estados son
+ * verosímiles: la rutina se cumple y seFallbacka puntualmente el paseo.
+ */
+export const registrosSemanaDemo: RegistroTarea[] = (() => {
+  const inicio = startOfWeek(new Date(), { weekStartsOn: 1 });
+  const registros: RegistroTarea[] = [];
+  let dia = inicio;
+  let indice = 0;
+  while (isBefore(dia, startOfToday())) {
+    const fecha = format(dia, 'yyyy-MM-dd');
+    for (const tarea of tareasDemo) {
+      // El paseo de los días impares se queda sin hacer: se ve un pendiente
+      // real, no un 100 % de perfección inventado.
+      const fallada = tarea.id === 'tar_4' && indice % 2 === 1;
+      registros.push({
+        id: `reg_sem_${fecha}_${tarea.id}`,
+        tareaId: tarea.id,
+        fecha,
+        estado: fallada ? 'pendiente' : 'realizada',
+        responsableId: 'cui_1',
+      });
+      indice += 1;
+    }
+    dia = addDays(dia, 1);
+  }
+  return registros;
+})();
+
 export const incidenciasDemo: Incidencia[] = [
   {
     id: 'inc_1',
@@ -348,18 +381,6 @@ export const incidenciasDemo: Incidencia[] = [
     resolucion: 'Sin lesiones. Se refuerza la supervisión en los paseos.',
   },
 ];
-
-export const informeDemo: Informe = {
-  perfilId: 'per_1',
-  periodo: {
-    desde: new Date(Date.now() - 86400000 * 6).toISOString(),
-    hasta: new Date().toISOString(),
-  },
-  tareasRealizadas: 33,
-  tareasTotales: 35,
-  incidencias: incidenciasDemo,
-  valoracion: 4.8,
-};
 
 export const historialDemo: RegistroHistorial[] = [
   {

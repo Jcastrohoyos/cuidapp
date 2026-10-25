@@ -26,6 +26,11 @@ coverage/
 .env
 .env.local
 .env.*.local
+# Archivos .env por perfil de Expo (.env.development, .env.preview,
+# .env.production…): pueden contener URLs y claves del backend.
+.env.*
+# El ejemplo sí se versiona: es la plantilla de los anteriores.
+!.env.example
 
 # logs
 npm-debug.*

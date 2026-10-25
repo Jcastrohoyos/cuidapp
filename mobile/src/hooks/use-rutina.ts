@@ -2,11 +2,26 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { endpoints } from '@/api/endpoints';
 import { qk } from '@/api/query-keys';
-import { tareasDelDia } from '@/utils/rutina';
+import { estadoDelDia } from '@/utils/adherencia';
+import { ordenarPorHora, tareasDelDia } from '@/utils/rutina';
 import type { Incidencia, RegistroTarea, Tarea } from '@/types';
 
 /** Datos para crear una tarea desde la familia (sin ids ni flags de origen). */
 export type NuevaTarea = Omit<Tarea, 'id' | 'perfilId' | 'personalizada' | 'fechaAplicacion'>;
+
+/** Cierra una incidencia con su resolución (familia o cuidador). */
+export function useResolverIncidencia(perfilId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ incidenciaId, resolucion }: { incidenciaId: string; resolucion: string }) =>
+      endpoints.resolverIncidencia(perfilId, incidenciaId, resolucion),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: qk.incidencias(perfilId) });
+      // El informe cuenta las incidencias del periodo: cambia al resolver una.
+      queryClient.invalidateQueries({ queryKey: qk.informe(perfilId) });
+    },
+  });
+}
 
 /** Rutina diaria de un perfil: tareas, registros del día e incidencias. */
 export function useRutina(perfilId: string, fecha: string) {
@@ -62,6 +77,9 @@ export function useRutina(perfilId: string, fecha: string) {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: qk.registros(perfilId, fecha) });
       queryClient.invalidateQueries({ queryKey: qk.tareas(perfilId) });
+      // El informe agrega los registros: sin invalidarlo, el % y las cifras de
+      // la pantalla Informes quedan obsoletos hasta que expire la caché.
+      queryClient.invalidateQueries({ queryKey: qk.informe(perfilId) });
     },
   });
 
@@ -87,28 +105,23 @@ export function useRutina(perfilId: string, fecha: string) {
     onSettled: () => queryClient.invalidateQueries({ queryKey: qk.tareas(perfilId) }),
   });
 
-  /** Estado vigente de una tarea: el registro más reciente (por id creciente). */
-  const estadoTarea = (tareaId: string): RegistroTarea['estado'] => {
-    const regs = (registros.data ?? []).filter((r) => r.tareaId === tareaId);
-    if (regs.length === 0) return 'pendiente';
-    const ultima = regs.reduce((a, b) => {
-      const na = Number(a.id.replace(/\D/g, '')) || 0;
-      const nb = Number(b.id.replace(/\D/g, '')) || 0;
-      return nb > na ? b : a;
-    });
-    return ultima.estado;
-  };
+  /** Estado vigente de una tarea: el del último registro de hoy. */
+  const estadoTarea = (tareaId: string): RegistroTarea['estado'] =>
+    estadoDelDia(registros.data ?? [], tareaId, fecha) ?? 'pendiente';
 
   return {
-    // Solo lo visible hoy: diarias + puntuales cuya fecha coincide.
-    tareas: tareasDelDia((tareas.data ?? []) as Tarea[], fecha),
+    // Solo lo visible hoy: diarias + puntuales cuya fecha coincide, y en
+    // orden de hora (la rutina se lee de arriba abajo).
+    tareas: ordenarPorHora(tareasDelDia((tareas.data ?? []) as Tarea[], fecha)),
     incidencias: (incidencias.data ?? []) as Incidencia[],
     estadoTarea,
     registrar,
     agregar,
     eliminar,
-    cargando: tareas.isLoading || registros.isLoading,
-    esError: tareas.isError || registros.isError,
+    cargando: tareas.isLoading || registros.isLoading || incidencias.isLoading,
+    // Las incidencias también son datos: si su consulta falla, la pantalla no
+    // puede afirmar "todo va según lo previsto".
+    esError: tareas.isError || registros.isError || incidencias.isError,
     refetch: () => {
       void tareas.refetch();
       void registros.refetch();

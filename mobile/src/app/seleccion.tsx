@@ -22,6 +22,11 @@ import { calcularAfinidad } from '@/utils/afinidad';
 import { confirmar } from '@/utils/confirmar';
 import { formatearDecimal, formatearEuro } from '@/utils/format';
 import { fam, FontSize, Spacing } from '@/constants/theme';
+import {
+  TEXTO_ESTADO_VERIFICACION,
+  TEXTOS_VERIFICACION,
+  tonoPorAfinidad,
+} from '@/constants/textos';
 import type { CandidatoComparado } from '@/types';
 
 interface CandidatoFilaProps {
@@ -47,14 +52,7 @@ const CandidatoFila = React.memo(function CandidatoFila({
   const colorVerificado = todasVerificadas ? theme.success : theme.warning;
   // % de afinidad: solo si hay competencias que comparar (nada inventado).
   const afinidad = calcularAfinidad(competenciasRequeridas, cuidador.competencias);
-  const tonoAfinidad =
-    afinidad === null
-      ? 'neutral'
-      : afinidad >= 70
-        ? 'success'
-        : afinidad >= 40
-          ? 'primary'
-          : 'neutral';
+  const tonoAfinidad = tonoPorAfinidad(afinidad);
 
   return (
     <Card
@@ -98,11 +96,7 @@ const CandidatoFila = React.memo(function CandidatoFila({
           <Chip
             key={verificacion.tipo}
             texto={`${TEXTOS_VERIFICACION[verificacion.tipo]}: ${
-              verificacion.estado === 'verificada'
-                ? 'verificada'
-                : verificacion.estado === 'pendiente'
-                  ? 'pendiente'
-                  : 'no aplica'
+              TEXTO_ESTADO_VERIFICACION[verificacion.estado] ?? verificacion.estado
             }`}
           />
         ))}
@@ -257,13 +251,6 @@ export default function SeleccionScreen() {
     </Screen>
   );
 }
-
-const TEXTOS_VERIFICACION: Record<string, string> = {
-  identidad: 'Identidad',
-  formacion: 'Formación',
-  penales: 'Antecedentes',
-  referencias: 'Referencias',
-};
 
 const styles = StyleSheet.create({
   cuerpo: {

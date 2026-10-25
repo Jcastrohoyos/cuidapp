@@ -7,7 +7,7 @@ import {
 
 import { endpoints } from '@/api/endpoints';
 import { qk } from '@/api/query-keys';
-import { useAuthStore } from '@/store/auth-store';
+import { useDataStore } from '@/store/data-store';
 import type { PerfilCuidado } from '@/types';
 
 export function usePerfiles(): UseQueryResult<PerfilCuidado[]> {
@@ -32,9 +32,16 @@ export function useCrearPerfil() {
  * Expone `esError`/`refetch` para que las pantallas distingan "no hay perfiles"
  * (vacío) de "no se pudo cargar" (error con reintento). */
 export function usePerfilActivo() {
-  const perfilActivoId = useAuthStore((estado) => estado.perfilActivoId);
+  // El perfil activo vive en el almacén (persistente): la familia no pierde
+  // el contexto entre reinicios de la app.
+  const perfilActivoId = useDataStore((estado) => estado.perfilActivoId);
   const { data: perfiles, isLoading, isError, refetch } = usePerfiles();
-  const id = perfilActivoId ?? perfiles?.[0]?.id ?? null;
+  // Si el id guardado ya no existe (perfil borrado), se usa el primero: la
+  // pantalla nunca se queda sin perfil por un id obsoleto.
+  const id =
+    (perfilActivoId && perfiles?.some((p) => p.id === perfilActivoId)
+      ? perfilActivoId
+      : perfiles?.[0]?.id) ?? null;
   const perfil = perfiles?.find((p) => p.id === id) ?? null;
   return { id, perfil, isLoading, esError: isError, refetch };
 }
@@ -74,7 +81,7 @@ export function useEliminarPerfil() {
       // Todo lo que cuelga del perfil desaparece del almacén demo → refrescar
       // por prefijo (['tareas'] alcanza a ['tareas', perfilId], …).
       (
-        ['tareas', 'registros', 'incidencias', 'informes', 'historial', 'configCuidador'] as const
+        ['tareas', 'registros', 'incidencias', 'informes', 'historial', 'configCuidador', 'candidatos'] as const
       ).forEach((clave) => queryClient.invalidateQueries({ queryKey: [clave] }));
     },
   });

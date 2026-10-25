@@ -108,6 +108,15 @@ export interface PerfilCuidado {
   actualizadoEn: ISODate;
 }
 
+/**
+ * Perfil tal y como lo crea la familia: todavía sin identificadores.
+ * El servidor (o el almacén en modo demo) los asigna, de modo que la persona
+ * y su perfil comparten siempre el mismo id.
+ */
+export type PerfilNuevo = Omit<PerfilCuidado, 'id' | 'actualizadoEn' | 'persona'> & {
+  persona: Omit<PersonaAtendida, 'id'> & { id?: string };
+};
+
 export interface DatosSensibles {
   descripcion?: string;
   /** Autonomía en las actividades de la vida diaria. */
@@ -259,7 +268,15 @@ export interface Informe {
   tareasRealizadas: number;
   tareasTotales: number;
   incidencias: Incidencia[];
+  /** Valoración media del cuidador asignado (reviews reales). Sin datos: undefined. */
   valoracion?: number;
+  /** Adherencia por rutina dentro del periodo (realizadas / programadas). */
+  adherencia: {
+    tareaId: ID;
+    nombre: string;
+    realizadas: number;
+    programadas: number;
+  }[];
 }
 
 export type CategoriaHistorial = 'habitos' | 'alimentacion' | 'movilidad' | 'mediciones';
@@ -281,4 +298,126 @@ export interface Sesion {
   token: string;
   familia: Familia;
   expiraEn: ISODate;
+}
+
+/* ============================================================================
+ * FASE 1: ALERTAS MÉDICAS + ESCALADO
+ * ============================================================================ */
+
+export type ISODateTime = string; // ISO 8601 con hora: 2026-10-23T14:30:00.000Z
+
+export type TipoAlerta =
+  | 'medicacion'
+  | 'signos_vitales'
+  | 'cita'
+  | 'recordatorio'
+  | 'urgencia';
+
+export type PrioridadAlerta = 'baja' | 'media' | 'alta' | 'critica';
+
+export interface AccionAlerta {
+  tipo?: 'abrir_tarea' | 'abrir_incidencia' | 'llamar' | 'url' | 'registrar_valor';
+  valor: string;
+}
+
+export interface AlertaMedica {
+  id: ID;
+  perfilId: ID;
+  tipo: TipoAlerta;
+  prioridad: PrioridadAlerta;
+  titulo: string;
+  mensaje: string;
+  fechaHora: ISODateTime;
+  leida: boolean;
+  descartada: boolean;
+  accion?: AccionAlerta;
+  reglaId?: ID;
+  creadaEn: ISODateTime;
+  leidaEn?: ISODateTime;
+  escalada: boolean;
+  nivelEscaladoActual: number;
+}
+
+/* ---------- Reglas de alerta ---------- */
+
+export type TipoRegla =
+  | 'medicacion'
+  | 'signos_vitales'
+  | 'cita'
+  | 'recordatorio'
+  | 'personalizada';
+
+export interface ReglaCondicion {
+  frecuencia?: 'diaria' | 'semanal' | 'mensual' | 'personalizada';
+  hora?: string;
+  horasEntreTomas?: number;
+  diasSemana?: number[];
+  tipoValor?: 'tension_sistolica' | 'tension_diastolica' | 'glucosa' | 'temperatura' | 'peso' | 'saturacion';
+  operador?: '>' | '<' | '>=' | '<=' | '==';
+  umbral?: number;
+  fechaCita?: ISODate;
+  recordatoriosPrevios?: number[];
+  cron?: string;
+}
+
+export interface ReglaAccion {
+  crearAlerta: boolean;
+  prioridadAlerta: PrioridadAlerta;
+  tituloPlantilla: string;
+  mensajePlantilla: string;
+  accion?: AccionAlerta;
+  crearTarea?: boolean;
+  tareaPlantilla?: Partial<Tarea>;
+  crearIncidencia?: boolean;
+}
+
+export interface NivelEscalado {
+  orden: number;
+  tipo: 'push_local' | 'push_familia' | 'sms' | 'llamada' | 'contacto_emergencia';
+  destinatario: 'familia' | 'cuidador' | 'contacto_emergencia' | 'telefono_personalizado';
+  telefono?: string;
+  mensajePlantilla: string;
+  retrasoMinutos: number;
+  requiereConfirmacion: boolean;
+}
+
+export interface ConfigEscalado {
+  niveles: NivelEscalado[];
+  tiempoMaximoSinRespuesta: number;
+}
+
+export interface ReglaAlerta {
+  id: ID;
+  perfilId: ID;
+  nombre: string;
+  tipo: TipoRegla;
+  condicion: ReglaCondicion;
+  accion: ReglaAccion;
+  escalado?: ConfigEscalado;
+  activa: boolean;
+  creadaEn: ISODateTime;
+  actualizadaEn: ISODateTime;
+  ultimaEjecucion?: ISODateTime;
+  proximaEjecucion?: ISODateTime;
+  vecesEjecutada: number;
+}
+
+/* ---------- Configuración notificaciones ---------- */
+
+export interface ConfigNotificaciones {
+  pushHabilitado: boolean;
+  sonidoHabilitado: boolean;
+  vibracionHabilitada: boolean;
+  sonidoPorPrioridad: Record<PrioridadAlerta, string>;
+  noMolestar: {
+    activado: boolean;
+    inicio: string;
+    fin: string;
+    permitirCriticas: boolean;
+  };
+  porPerfil: Record<ID, {
+    pushHabilitado?: boolean;
+    sonidoHabilitado?: boolean;
+    noMolestar?: { activado: boolean; inicio: string; fin: string; };
+  }>;
 }

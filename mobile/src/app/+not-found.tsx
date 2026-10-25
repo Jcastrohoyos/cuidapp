@@ -3,11 +3,16 @@ import { Text } from '@/components/text';
 import { Link } from 'expo-router';
 
 import { Screen } from '@/components/ui/screen';
+import { useEstadoAuth } from '@/hooks/use-auth';
 import { useTheme } from '@/hooks/use-theme';
 import { fam, FontSize, Spacing } from '@/constants/theme';
 
 export default function NotFoundScreen() {
   const theme = useTheme();
+  const estado = useEstadoAuth();
+  // Sin sesión, "volver al inicio" llevaría a una ruta protegida que el
+  // guard rebota al login: mejor llevar directamente al acceso.
+  const destino = estado === 'autenticado' ? '/(tabs)' : '/(auth)/login';
 
   return (
     <Screen contentStyle={styles.contenido}>
@@ -15,8 +20,8 @@ export default function NotFoundScreen() {
       <Text style={[styles.texto, { color: theme.textSecondary }]}>
         La ruta que buscas no existe en Cuidapp.
       </Text>
-      <Link href="/(tabs)" style={[styles.enlace, { color: theme.primary }]}>
-        Volver al inicio
+      <Link href={destino} style={[styles.enlace, { color: theme.primary }]}>
+        {estado === 'autenticado' ? 'Volver al inicio' : 'Ir al acceso'}
       </Link>
     </Screen>
   );

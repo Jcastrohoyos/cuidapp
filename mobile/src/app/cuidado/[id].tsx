@@ -17,7 +17,7 @@ import { ScreenHeader } from '@/components/ui/screen-header';
 import { SectionHeader } from '@/components/ui/section-header';
 import { ThemedText } from '@/components/themed-text';
 import { usePerfil, usePublicarPerfil, useEliminarPerfil } from '@/hooks/use-perfiles';
-import { useAuthStore } from '@/store/auth-store';
+import { useDataStore } from '@/store/data-store';
 import { useTheme } from '@/hooks/use-theme';
 import { useToast } from '@/hooks/use-toast';
 import { confirmar } from '@/utils/confirmar';
@@ -42,12 +42,20 @@ const TEXTO_GENERO: Record<string, string> = {
   otro: 'Otro',
 };
 
+/** Tipo de atención con su nombre legible (no el identificador interno). */
+const TEXTO_ATENCION: Record<string, string> = {
+  domiciliaria: 'Domiciliaria',
+  acompanamiento: 'Acompañamiento',
+  temporal: 'Temporal',
+  residencia: 'Residencia',
+};
+
 export default function PerfilCuidadoScreen() {
   const theme = useTheme();
   const toast = useToast();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const establecerPerfilActivo = useAuthStore((estado) => estado.establecerPerfilActivo);
-  const perfilActivoId = useAuthStore((estado) => estado.perfilActivoId);
+  const establecerPerfilActivo = useDataStore((estado) => estado.establecerPerfilActivo);
+  const perfilActivoId = useDataStore((estado) => estado.perfilActivoId);
   const { data: perfil, isLoading, isError, refetch } = usePerfil(id ?? '');
   const publicar = usePublicarPerfil(id ?? '');
   const eliminar = useEliminarPerfil();
@@ -58,7 +66,9 @@ export default function PerfilCuidadoScreen() {
 
   const cabecera = <ScreenHeader titulo="Perfil de cuidado" />;
 
-  if (isLoading) return <Loading mensaje="Cargando perfil de cuidado…" />;
+  // Con cabecera: si no, el modal deja a la familia sin salida visible
+  // mientras carga.
+  if (isLoading) return <Loading mensaje="Cargando perfil de cuidado…" cabecera={cabecera} />;
 
   if (isError) {
     return (
@@ -119,7 +129,10 @@ export default function PerfilCuidadoScreen() {
       <SectionHeader titulo="Necesidades y atención" />
       <Card>
         <View style={styles.kv}>
-          <FilaDato etiqueta="Tipo de atención" valor={perfil.tipoAtencion} />
+          <FilaDato
+            etiqueta="Tipo de atención"
+            valor={TEXTO_ATENCION[perfil.tipoAtencion] ?? perfil.tipoAtencion}
+          />
           {perfil.persona.genero && perfil.persona.genero !== 'no_especificar' ? (
             <FilaDato etiqueta="Género" valor={TEXTO_GENERO[perfil.persona.genero]} />
           ) : null}
@@ -141,7 +154,7 @@ export default function PerfilCuidadoScreen() {
       {perfil.habitos.length === 0 ? (
         <EmptyState
           titulo="Sin hábitos registrados"
-          descripcion="Al crear o editar el perfil puedes detallar horarios, comidas, descansos y aficiones."
+          descripcion="Al crear el perfil puedes detallar horarios, comidas, descansos y aficiones."
         />
       ) : null}
 

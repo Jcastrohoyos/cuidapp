@@ -17,7 +17,10 @@ export function useHistorial(
   opts?: { desde?: string; hasta?: string; limite?: number },
 ) {
   return useQuery({
-    queryKey: qk.historial(perfilId),
+    // Los filtros entran en la clave: sin ellos, la consulta del recorrido
+    // (5 registros) y la de informes (20) comparten caché y una sobrescribe
+    // a la otra.
+    queryKey: qk.historial(perfilId, opts),
     queryFn: () => endpoints.listarHistorial(perfilId, opts),
     enabled: Boolean(perfilId),
   });

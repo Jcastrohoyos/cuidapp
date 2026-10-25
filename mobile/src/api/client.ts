@@ -35,24 +35,48 @@ export const canalUpdates = (() => {
 export const esModoDesarrollo = __DEV__ || canalUpdates === 'development';
 
 /**
- * Falla rápido en builds de distribución: sin `EXPO_PUBLIC_API_URL` la app
- * arranca en modo demo (login sin contraseña, token estático). Un binario de
- * store o preview sin esa variable es irrecuperable, así que lo bloqueamos.
+ * Problema de configuración del binario actual (o null si todo está bien).
+ *
+ * Un build de distribución sin `EXPO_PUBLIC_API_URL` arranca en modo demo
+ * (login sin contraseña, token estático), pero eso en un binario de tienda o
+ * preview es irrecuperable. Se devuelve el mensaje en lugar de lanzar para
+ * que la app pueda mostrarlo al usuario (pantalla en blanco es peor que un
+ * error legible).
  * Excepción: `EXPO_PUBLIC_MODO_DEMO=1` autoriza explícitamente un build demo
  * de distribución (APK de pruebas) — los avisos "Modo demo" de la UI salen
  * solos porque todo el flujo usa mocks.
  */
+export function problemaDeConfiguracion(): string | null {
+  if (!USAR_MOCKS) return null;
+  if (esModoDemo) return null;
+  // Desarrollo local (`npx expo start`) o build del canal 'development':
+  // los datos de ejemplo son lo esperado.
+  if (esModoDesarrollo) return null;
+  return (
+    'Cuidapp está en modo demo: EXPO_PUBLIC_API_URL está vacío. Define esa variable ' +
+    'para el perfil de build correspondiente en eas.json (development/preview/production) ' +
+    'antes de construir un binario de distribución.'
+  );
+}
+
+/** Falla rápido si el binario se construyó sin la configuración necesaria. */
 export function assertApiConfigurado(): void {
-  if (USAR_MOCKS && !esModoDesarrollo && !esModoDemo) {
-    throw new Error(
-      'Cuidapp está en modo demo: EXPO_PUBLIC_API_URL está vacío. Define esa variable ' +
-        'para el perfil de build correspondiente en eas.json (development/preview/production) ' +
-        'antes de construir un binario de distribución.',
-    );
-  }
+  const problema = problemaDeConfiguracion();
+  if (problema) throw new Error(problema);
 }
 
 const TOKEN_KEY = 'cuidapp.token';
+
+/** Tiempo máximo de espera de una petición (ms). */
+export const TIEMPO_LIMITE_PETICION = 10_000;
+
+/** Error de red: la petición no llegó a completarse (sin cobertura, timeout…). */
+export class ErrorDeRed extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ErrorDeRed';
+  }
+}
 
 export class ApiError extends Error {
   constructor(
@@ -92,6 +116,13 @@ export const tokenStorage = Platform.select({
   },
 })!;
 
+/**
+ * Ejecuta la petición con un tiempo límite.
+ *
+ * Sin timeout, una red caída deja la app esperando indefinidamente (el splash
+ * no se oculta y la pantalla queda en "cargando"). `AbortController` + un
+ * temporizador own funcionan en todas las plataformas (incluido Hermes).
+ */
 async function peticion<T>(
   path: string,
   init: RequestInit = {},
@@ -108,7 +139,27 @@ async function peticion<T>(
     if (token) headers.Authorization = `Bearer ${token}`;
   }
 
-  const respuesta = await fetch(`${API_URL}${path}`, { ...init, headers });
+  const controlador = new AbortController();
+  const temporizador = setTimeout(() => controlador.abort(), TIEMPO_LIMITE_PETICION);
+
+  let respuesta: Response;
+  try {
+    respuesta = await fetch(`${API_URL}${path}`, {
+      ...init,
+      headers,
+      signal: controlador.signal,
+    });
+  } catch (error) {
+    // Red caída o tiempo agotado: un error propio, no un crash de la app.
+    const abortado = (error as { name?: string })?.name === 'AbortError';
+    throw new ErrorDeRed(
+      abortado
+        ? 'El servidor ha tardado demasiado en responder. Revisa tu conexión e inténtalo de nuevo.'
+        : 'No hemos podido conectar con el servidor. Revisa tu conexión e inténtalo de nuevo.',
+    );
+  } finally {
+    clearTimeout(temporizador);
+  }
 
   if (!respuesta.ok) {
     let detalles: unknown;
@@ -123,8 +174,15 @@ async function peticion<T>(
     throw new ApiError(respuesta.status, mensaje, detalles);
   }
 
+  // 204 y 200 sin cuerpo: no hay nada que deserializar (p. ej. un DELETE).
   if (respuesta.status === 204) return undefined as T;
-  return (await respuesta.json()) as T;
+  const cuerpo = await respuesta.text();
+  if (!cuerpo) return undefined as T;
+  try {
+    return JSON.parse(cuerpo) as T;
+  } catch {
+    throw new ApiError(respuesta.status, 'La respuesta del servidor no tiene un formato válido.');
+  }
 }
 
 export const api = {
@@ -133,6 +191,12 @@ export const api = {
     peticion<T>(
       path,
       { method: 'POST', body: body === undefined ? undefined : JSON.stringify(body) },
+      auth,
+    ),
+  put: <T>(path: string, body?: unknown, auth?: boolean) =>
+    peticion<T>(
+      path,
+      { method: 'PUT', body: body === undefined ? undefined : JSON.stringify(body) },
       auth,
     ),
   patch: <T>(path: string, body?: unknown, auth?: boolean) =>

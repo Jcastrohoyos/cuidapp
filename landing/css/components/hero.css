@@ -59,7 +59,9 @@
 }
 
 .hero__title {
-  max-width: 22ch;
+  max-width: 24ch;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
 }
 
 .hero__title em {

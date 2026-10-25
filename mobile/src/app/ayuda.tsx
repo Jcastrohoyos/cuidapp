@@ -10,16 +10,21 @@ import { Spacing } from '@/constants/theme';
 
 /**
  * Tutorial integrado: el recorrido real de uso de la app, en lenguaje llano.
- * Mismos pasos que el manual de uso (fases 01–08) resumidos a lo esencial.
+ * Los 7 pasos son los mismos que muestra la portada («Continuar el recorrido»),
+ * para que la ayuda y el recorrido no se contradigan.
  */
 const PASOS = [
+  {
+    titulo: 'Crea la cuenta familiar',
+    texto: 'Una sola cuenta para toda la familia: el correo con el que entras es el de la persona responsable del cuidado.',
+  },
   {
     titulo: 'Crea el perfil de la persona atendida',
     texto: 'Cuéntanos quién es, qué necesita y cómo organiza su día. Los datos de salud solo los ve la familia: nunca aparecen en la oferta pública.',
   },
   {
     titulo: 'Publica la oferta de cuidado',
-    texto: 'Con el perfil publicado, cuidadores de tu zona pueden enviar candidaturas. Tú decides cuándo publicar y puedes editarla.',
+    texto: 'Con el perfil publicado, cuidadores de tu zona pueden enviar candidaturas. Tú decides cuándo publicar.',
   },
   {
     titulo: 'Compara las candidaturas',
@@ -30,12 +35,12 @@ const PASOS = [
     texto: 'Al seleccionar a alguien, fija en «Mi cuidador» el horario y la tarifa acordados, y decide qué puede ver y hacer: datos clínicos, informes, incidencias…',
   },
   {
-    titulo: 'Organiza la rutina',
-    texto: 'Añade tareas a diario o solo para hoy, marca las que se completan y consulta el progreso del día. Cualquier familiar de la cuenta puede ampliar la lista.',
+    titulo: 'Contrata los servicios que necesites',
+    texto: 'Gestoría, fisioterapia, logopedia, enfermería… Servicios complementarios al cuidado diario, con sus condiciones a la vista.',
   },
   {
-    titulo: 'Sigue los informes',
-    texto: 'Adherencia de la rutina, incidencias y historial reciente, para decidir con continuidad y compartirlo con quien haga falta.',
+    titulo: 'Organiza la rutina y sigue los informes',
+    texto: 'Añade tareas a diario o solo para hoy, marca las que se completan y consulta el progreso del día y la adherencia de la semana.',
   },
 ];
 
@@ -44,7 +49,7 @@ export default function AyudaScreen() {
 
   return (
     <Screen>
-      <ScreenHeader titulo="Cómo funciona Cuidapp" subtitulo="Guía rápida en 6 pasos" />
+      <ScreenHeader titulo="Cómo funciona Cuidapp" subtitulo={`Guía rápida en ${PASOS.length} pasos`} />
 
       <ThemedText type="small" themeColor="textSecondary">
         Sigue esta guía la primera vez que abras la app y vuelve a consultarla cuando tengas dudas.
@@ -73,8 +78,8 @@ export default function AyudaScreen() {
       <Card>
         <ThemedText type="smallBold">Texto grande</ThemedText>
         <ThemedText type="small" themeColor="textSecondary">
-          Si necesitas leer con más comodidad, activa «Texto grande» en la pestaña Perfil →
-          Accesibilidad. Cambia todo el tamaño de la app al instante.
+          Si necesitas leer con más comodidad, abre tu perfil (tu avatar en Inicio) → Accesibilidad y
+          activa «Texto grande». Cambia todo el tamaño de la app al instante.
         </ThemedText>
       </Card>
       <Card>
@@ -87,8 +92,8 @@ export default function AyudaScreen() {
       <Card>
         <ThemedText type="smallBold">¿Necesitas ayuda con la cuenta?</ThemedText>
         <ThemedText type="small" themeColor="textSecondary">
-          Desde la pestaña Perfil puedes editar tus datos, ver tu plan o cerrar la sesión. En modo
-          demo, todos los datos son de ejemplo y viven en tu dispositivo.
+          Desde tu perfil (tu avatar en Inicio) puedes editar tus datos, ver tu plan o cerrar la
+          sesión. En modo demo, todos los datos son de ejemplo y viven en tu dispositivo.
         </ThemedText>
       </Card>
     </Screen>

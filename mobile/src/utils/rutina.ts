@@ -10,6 +10,14 @@ export function tareasDelDia(tareas: Tarea[], fecha: ISODate): Tarea[] {
   return tareas.filter((t) => t.repeticion !== 'unica' || t.fechaAplicacion === fecha);
 }
 
+/**
+ * Tareas ordenadas por hora de ejecución: la rutina se lee de arriba abajo
+ * (mediodía 13:00 antes que noche 21:00), no en el orden en que se crearon.
+ */
+export function ordenarPorHora(tareas: Tarea[]): Tarea[] {
+  return [...tareas].sort((a, b) => a.hora.localeCompare(b.hora));
+}
+
 /** Hora por defecto al crear una tarea sin hora explícita, según el momento. */
 export const HORA_POR_MOMENTO = {
   manana: '09:00',

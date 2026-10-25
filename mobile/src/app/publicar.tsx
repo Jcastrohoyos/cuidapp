@@ -34,7 +34,9 @@ export default function PublicarScreen() {
     />
   );
 
-  if (isLoading) return <Loading mensaje="Cargando oferta…" />;
+  // Con cabecera: la pantalla es un modal y la familia necesita una salida
+  // visible mientras carga.
+  if (isLoading) return <Loading mensaje="Cargando oferta…" cabecera={cabecera} />;
 
   if (esError) {
     return (
@@ -132,6 +134,10 @@ export default function PublicarScreen() {
           descripcion="Revisa tu conexión e inténtalo de nuevo."
           accion={{ texto: 'Reintentar', onPress: () => void candidatos.refetch() }}
         />
+      ) : candidatos.isLoading ? (
+        // Mientras se cargan no se anuncia "sin candidaturas": la familia
+        // vería un vacío que no es real.
+        <Loading mensaje="Cargando candidaturas…" />
       ) : lista.length === 0 ? (
         <EmptyState
           titulo="Sin candidaturas todavía"

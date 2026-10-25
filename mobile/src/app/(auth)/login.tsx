@@ -157,7 +157,10 @@ const styles = StyleSheet.create({
     fontFamily: fam(700),
     fontSize: FontSize.sm,
     fontWeight: '700',
-    paddingVertical: Spacing.one,
+    // Objetivo táctil mínimo de 44 pt (WCAG 2.5.8 / Material).
+    minHeight: 44,
+    textAlignVertical: 'center',
+    paddingVertical: Spacing.two,
   },
   errorRed: {
     fontFamily: fam(400),
@@ -184,5 +187,9 @@ const styles = StyleSheet.create({
     fontFamily: fam(700),
     fontSize: FontSize.sm,
     fontWeight: '700',
+    // Objetivo táctil mínimo de 44 pt (WCAG 2.5.8 / Material).
+    minHeight: 44,
+    textAlignVertical: 'center',
+    paddingVertical: Spacing.two,
   },
 });

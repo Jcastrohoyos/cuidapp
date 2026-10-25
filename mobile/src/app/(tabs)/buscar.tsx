@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import Lucide from '@react-native-vector-icons/lucide';
 
-import { Text } from '@/components/text';
+import { Text, useTextoGrande, FACTOR_TEXTO_GRANDE } from '@/components/text';
 import { ThemedText } from '@/components/themed-text';
 import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -15,13 +15,13 @@ import { Screen } from '@/components/ui/screen';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { useCuidadores } from '@/hooks/use-cuidadores';
 import { usePerfilActivo } from '@/hooks/use-perfiles';
-import { useSesion } from '@/hooks/use-auth';
 import { useTheme } from '@/hooks/use-theme';
 import { useDataStore } from '@/store/data-store';
 import { calcularAfinidad } from '@/utils/afinidad';
 import { filtrarCuidadores } from '@/utils/buscar-cuidadores';
 import { formatearDecimal, formatearEuro } from '@/utils/format';
 import { fam, FontSize, Radius, Spacing } from '@/constants/theme';
+import { tonoPorAfinidad } from '@/constants/textos';
 import type { Cuidador, TipoVerificacion } from '@/types';
 
 interface FilaCuidadorProps {
@@ -43,8 +43,7 @@ function FilaCuidador({
 }: FilaCuidadorProps) {
   const theme = useTheme();
   const afinidad = calcularAfinidad(competenciasRequeridas, cuidador.competencias ?? []);
-  const tono =
-    afinidad === null ? 'neutral' : afinidad >= 70 ? 'success' : afinidad >= 40 ? 'primary' : 'neutral';
+  const tono = tonoPorAfinidad(afinidad);
   // `null` = sin preferencias de verificación: no se juzga (nada inventado).
   const verificado =
     verificacionesMinimas.length > 0
@@ -102,9 +101,10 @@ function FilaCuidador({
  */
 export default function BuscarScreen() {
   const theme = useTheme();
-  const sesion = useSesion();
-  const familiaLocal = useDataStore((estado) => estado.familia);
-  const familia = familiaLocal ?? sesion?.familia;
+  const { textoGrande } = useTextoGrande();
+  // La cuenta familiar vive en el almacén (se sincroniza al iniciar sesión):
+  // el nombre y el correo con los que se entra son los de la familia.
+  const familia = useDataStore((estado) => estado.familia);
   const { perfil } = usePerfilActivo();
   const cuidadores = useCuidadores();
 
@@ -118,6 +118,7 @@ export default function BuscarScreen() {
   const distanciaMaxKm = preferencias?.distanciaMaxKm ?? 10;
   const franjas = preferencias?.franjas;
   const verificacionesMinimas = preferencias?.verificacionesMinimas;
+  const tarifaMaxHora = preferencias?.tarifaMaxHora;
 
   const resultados = useMemo(
     () =>
@@ -130,6 +131,7 @@ export default function BuscarScreen() {
         soloVerificados,
         verificacionesMinimas: verificacionesMinimas ?? [],
         mejorValorados,
+        tarifaMaxHora,
       }),
     [
       cuidadores.data,
@@ -141,6 +143,7 @@ export default function BuscarScreen() {
       soloVerificados,
       verificacionesMinimas,
       mejorValorados,
+      tarifaMaxHora,
     ],
   );
 
@@ -193,7 +196,12 @@ export default function BuscarScreen() {
           onChangeText={setTexto}
           placeholder="Buscar por nombre o competencia"
           placeholderTextColor={theme.textSecondary}
-          style={[styles.input, { color: theme.text }]}
+          style={[
+            styles.input,
+            { color: theme.text },
+            // El input no pasa por <Text>: la escala "Texto grande" va aquí.
+            ...(textoGrande ? [{ fontSize: FontSize.base * FACTOR_TEXTO_GRANDE }] : []),
+          ]}
           accessibilityLabel="Buscar cuidadores por nombre o competencia"
           autoCorrect={false}
         />

@@ -5,13 +5,13 @@ import { Text } from '@/components/text';
 
 import { USAR_MOCKS } from '@/api/client';
 import { Avatar } from '@/components/ui/avatar';
-import { Badge, badgeEstadoPerfil } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { Screen } from '@/components/ui/screen';
+import { TarjetaPerfil } from '@/components/ui/profile-card';
 import { SectionHeader } from '@/components/ui/section-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Recorrido } from '@/components/recorrido';
@@ -21,8 +21,11 @@ import { useRecorrido } from '@/hooks/use-recorrido';
 import { useRutina } from '@/hooks/use-rutina';
 import { useSesion } from '@/hooks/use-auth';
 import { useTheme } from '@/hooks/use-theme';
-import { calcularEdad, fechaHoy, formatearHorario, porcentaje } from '@/utils/format';
+import { useOnboarding, ONBOARDING_KEYS } from '@/hooks/use-onboarding';
+import { fechaHoy, porcentaje } from '@/utils/format';
 import { fam, FontSize, Radius, Spacing } from '@/constants/theme';
+import { Tooltip } from '@/components/ui/tooltip';
+import { useRef } from 'react';
 
 export default function InicioScreen() {
   const sesion = useSesion();
@@ -31,6 +34,11 @@ export default function InicioScreen() {
   const hoy = fechaHoy();
   const rutina = useRutina(perfil?.id ?? '', hoy);
   const recorrido = useRecorrido();
+  const { yaVisto, marcarVisto } = useOnboarding();
+
+  // Refs para los tooltips de onboarding
+  const refBuscar = useRef<React.ElementRef<typeof Pressable>>(null);
+  const refPerfil = useRef<React.ElementRef<typeof Pressable>>(null);
 
   // Carga inicial con la forma del contenido en lugar de un spinner: menos
   // flash entre pantallas (la data real llega en cuestión de milisegundos).
@@ -79,10 +87,11 @@ export default function InicioScreen() {
       void refetch();
       rutina.refetch();
     }}>
-      <Cabecera nombre={sesion?.familia.nombre ?? ''} />
+      <Cabecera nombre={sesion?.familia.nombre ?? ''} refPerfil={refPerfil} />
 
       {/* Atajo al buscador (mismo encaje que en la demo; abre la pestaña Buscar) */}
       <Pressable
+        ref={refBuscar}
         onPress={() => router.push('/buscar')}
         accessibilityRole="button"
         accessibilityLabel="Buscar cuidadores"
@@ -106,24 +115,11 @@ export default function InicioScreen() {
 
       {/* Perfil de cuidado activo */}
       <Link href={`/cuidado/${perfil.id}`} asChild>
-        <Card row accessibilityHint={`Abre el perfil de cuidado de ${perfil.persona.nombre}`}>
-          <Avatar nombre={perfil.persona.nombre} tamano="lg" />
-          <View style={styles.flex}>
-            <ThemedText type="smallBold">
-              {perfil.persona.nombre}
-              {perfil.persona.fechaNacimiento
-                ? `, ${calcularEdad(perfil.persona.fechaNacimiento)} años`
-                : ''}
-            </ThemedText>
-            <ThemedText type="small" themeColor="textSecondary">
-              {perfil.ubicacion.zona}, {perfil.ubicacion.ciudad}
-            </ThemedText>
-            <ThemedText type="small" themeColor="textSecondary">
-              {formatearHorario(perfil.horario.dias, perfil.horario.desde, perfil.horario.hasta)}
-            </ThemedText>
-          </View>
-          <Badge {...badgeEstadoPerfil(perfil.estado)} />
-        </Card>
+        <TarjetaPerfil
+          perfil={perfil}
+          mostrarHorario
+          accessibilityHint={`Abre el perfil de cuidado de ${perfil.persona.nombre}`}
+        />
       </Link>
 
       {/* Resumen del día */}
@@ -181,17 +177,46 @@ export default function InicioScreen() {
         rutaPerfil={recorrido.rutaPerfil}
         onIr={(ruta) => router.push(ruta)}
       />
+
+      {/* Tooltips de onboarding (solo si no se han visto) */}
+      {!yaVisto(ONBOARDING_KEYS.INICIO_BUSCAR) && (
+        <Tooltip
+          clave={ONBOARDING_KEYS.INICIO_BUSCAR}
+          targetRef={refBuscar}
+          texto="Pulsa aquí para buscar cuidadores por zona, competencia o disponibilidad."
+          posicion="abajo"
+          onDescartar={() => marcarVisto(ONBOARDING_KEYS.INICIO_BUSCAR)}
+          mostrarContinuar
+        />
+      )}
+      {!yaVisto(ONBOARDING_KEYS.INICIO_PERFIL) && (
+        <Tooltip
+          clave={ONBOARDING_KEYS.INICIO_PERFIL}
+          targetRef={refPerfil}
+          texto="Tu perfil: cuenta, ajustes, ayuda y cerrar sesión."
+          posicion="izquierda"
+          onDescartar={() => marcarVisto(ONBOARDING_KEYS.INICIO_PERFIL)}
+          mostrarContinuar
+        />
+      )}
     </Screen>
   );
 }
 
 /** Cabecera de Inicio: saludo + avatar que abre el perfil de cuenta
  * (el avatar de la demo de la landing; Perfil ya no es pestaña). */
-function Cabecera({ nombre }: { nombre: string }) {
+function Cabecera({
+  nombre,
+  refPerfil,
+}: {
+  nombre: string;
+  refPerfil?: React.RefObject<React.ElementRef<typeof Pressable> | null>;
+}) {
   return (
     <View style={styles.cabecera}>
       <Saludo nombre={nombre} />
       <Pressable
+        ref={refPerfil}
         onPress={() => router.push('/perfil')}
         accessibilityRole="button"
         accessibilityLabel="Abrir mi perfil"

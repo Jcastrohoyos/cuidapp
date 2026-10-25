@@ -67,8 +67,9 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
   },
   boton: {
-    width: 40,
-    height: 40,
+    // Objetivo táctil mínimo de 44 pt (WCAG 2.5.8 / Material).
+    width: 44,
+    height: 44,
     borderRadius: Radius.full,
     borderWidth: StyleSheet.hairlineWidth,
     alignItems: 'center',

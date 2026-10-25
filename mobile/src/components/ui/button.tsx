@@ -6,6 +6,7 @@ import {
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
+import { forwardRef } from 'react';
 import { Text } from '@/components/text';
 
 import { useTheme } from '@/hooks/use-theme';
@@ -25,7 +26,7 @@ interface ButtonProps {
   style?: StyleProp<ViewStyle>;
 }
 
-export function Button({
+export const Button = forwardRef<React.ElementRef<typeof Pressable>, ButtonProps>(({
   titulo,
   onPress,
   variante = 'primary',
@@ -34,7 +35,7 @@ export function Button({
   cargando,
   fullWidth,
   style,
-}: ButtonProps) {
+}: ButtonProps) => {
   const theme = useTheme();
   const inactivo = disabled || cargando;
 
@@ -74,7 +75,9 @@ export function Button({
       )}
     </Pressable>
   );
-}
+});
+
+Button.displayName = 'Button';
 
 const styles = StyleSheet.create({
   base: {

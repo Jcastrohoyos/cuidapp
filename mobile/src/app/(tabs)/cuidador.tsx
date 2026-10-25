@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
-import { StyleSheet, Switch, View } from 'react-native';
+import { useState, useRef } from 'react';
+import { Pressable, StyleSheet, Switch, View } from 'react-native';
 import { Text } from '@/components/text';
 
 import { Avatar } from '@/components/ui/avatar';
@@ -20,16 +20,15 @@ import { useConfigCuidador, useGuardarConfigCuidador, useMiCuidador } from '@/ho
 import { usePerfilActivo } from '@/hooks/use-perfiles';
 import { useTheme } from '@/hooks/use-theme';
 import { useToast } from '@/hooks/use-toast';
+import { useOnboarding, ONBOARDING_KEYS } from '@/hooks/use-onboarding';
+import { Tooltip } from '@/components/ui/tooltip';
 import { formatearDecimal } from '@/utils/format';
 import { fam, FontSize, Spacing } from '@/constants/theme';
-import type { PermisosCuidador, TipoVerificacion } from '@/types';
-
-const TEXTOS_VERIFICACION: Record<TipoVerificacion, string> = {
-  identidad: 'Identidad',
-  formacion: 'Formación',
-  penales: 'Antecedentes penales',
-  referencias: 'Referencias',
-};
+import type { PermisosCuidador } from '@/types';
+import {
+  TEXTO_ESTADO_VERIFICACION,
+  TEXTOS_VERIFICACION,
+} from '@/constants/textos';
 
 const FILAS_PERMISO: {
   clave: keyof PermisosCuidador;
@@ -66,8 +65,12 @@ const FILAS_PERMISO: {
 export default function CuidadorScreen() {
   const theme = useTheme();
   const toast = useToast();
+  const { yaVisto, marcarVisto } = useOnboarding();
   const { perfil, isLoading: cargandoPerfil, esError: errorPerfil, refetch: refetchPerfil } = usePerfilActivo();
   const perfilId = perfil?.id ?? '';
+
+  // Refs para tooltips
+  const refPermisos = useRef<React.ElementRef<typeof Pressable>>(null);
 
   const { cuidador, isLoading: cargandoCandidatos, esError: errorCandidatos, refetch: refetchCandidatos } =
     useMiCuidador(perfilId);
@@ -151,11 +154,18 @@ export default function CuidadorScreen() {
     cuidador.verificaciones.every((v) => v.estado === 'verificada');
 
   const guardarConfig = () => {
-    const tarifaNumero = tarifa.trim() ? Number(tarifa.trim().replace(',', '.')) : undefined;
+    const textoTarifa = tarifa.trim();
+    const tarifaNumero = textoTarifa ? Number(textoTarifa.replace(',', '.')) : undefined;
+    // Una tarifa que no es un número no se guarda: si se guardara como
+    // "undefined", el acuerdo ya firmado desaparecería sin avisar.
+    if (textoTarifa && !Number.isFinite(tarifaNumero)) {
+      toast.error('La tarifa debe ser un número (por ejemplo, 14).');
+      return;
+    }
     guardar.mutate(
       {
         horarioAcordado: horario.trim() || undefined,
-        tarifaAcordada: tarifaNumero != null && Number.isFinite(tarifaNumero) ? tarifaNumero : undefined,
+        tarifaAcordada: tarifaNumero,
         nota: nota.trim() || undefined,
         permisos: permisos ?? undefined,
       },
@@ -215,7 +225,7 @@ export default function CuidadorScreen() {
             <Chip
               key={v.tipo}
               texto={`${TEXTOS_VERIFICACION[v.tipo]}: ${
-                v.estado === 'verificada' ? 'verificada' : v.estado === 'pendiente' ? 'pendiente' : 'no aplica'
+                TEXTO_ESTADO_VERIFICACION[v.estado] ?? v.estado
               }`}
             />
           ))}
@@ -248,7 +258,19 @@ export default function CuidadorScreen() {
       </Card>
 
       {/* ---- Permisos ---- */}
-      <SectionHeader titulo="Qué puede ver y hacer" />
+      <View ref={refPermisos}>
+        <SectionHeader titulo="Qué puede ver y hacer" />
+      </View>
+      {!yaVisto(ONBOARDING_KEYS.CUIDADOR_PERMISOS) && (
+        <Tooltip
+          clave={ONBOARDING_KEYS.CUIDADOR_PERMISOS}
+          targetRef={refPermisos}
+          texto="Configura qué puede ver y hacer tu cuidador: datos clínicos, rutina, informes, incidencias y avisos."
+          posicion="abajo"
+          onDescartar={() => marcarVisto(ONBOARDING_KEYS.CUIDADOR_PERMISOS)}
+          mostrarContinuar
+        />
+      )}
       <Card>
         {FILAS_PERMISO.map((fila, indice) => (
           <View

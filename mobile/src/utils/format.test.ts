@@ -20,8 +20,22 @@ describe('utils/format', () => {
 
   it('describe el horario de forma legible', () => {
     const dias = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'] as const;
-    expect(formatearHorario(dias as unknown as string[], '09:00', '13:00')).toBe('5 días · 09:00–13:00');
+    expect(formatearHorario(dias as unknown as string[], '09:00', '13:00')).toBe(
+      'Lun–Vie · 09:00–13:00',
+    );
     expect(formatearHorario([], '09:00', '13:00')).toBe('09:00–13:00');
+    expect(
+      formatearHorario(
+        ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'],
+        '09:00',
+        '13:00',
+      ),
+    ).toBe('Todos los días · 09:00–13:00');
+    expect(formatearHorario(['sabado', 'domingo'], '10:00', '14:00')).toBe('Sáb–Dom · 10:00–14:00');
+    // Un calendario irregular se nombra día a día, no se cuenta.
+    expect(formatearHorario(['lunes', 'miercoles', 'viernes'], '09:00', '13:00')).toBe(
+      'Lun · Mié · Vie · 09:00–13:00',
+    );
   });
 
   it('formatea importes en euros', () => {
