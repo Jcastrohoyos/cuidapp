@@ -38,6 +38,7 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
           cache: 'gradle'
+          cache-dependency-path: mobile/gradle-wrapper.properties
 
       # --- Android SDK ---
       - name: Setup Android SDK
@@ -54,7 +55,7 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          key: gradle-${{ runner.os }}-${{ hashFiles('mobile/**/*.gradle*', 'mobile/**/gradle-wrapper.properties') }}
           restore-keys: gradle-${{ runner.os }}-
 
       - name: Cache npm
