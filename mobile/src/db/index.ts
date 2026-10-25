@@ -34,7 +34,7 @@ export function getDatabase(): any {
   const adapter = new SQLiteAdapter({
     schema,
     dbName: 'cuidapp.db',
-    // jsi: true, // Use JSI dispatcher for Expo/React Native - TEMPORARILY DISABLED for build debugging
+    jsi: true, // Use JSI dispatcher for Expo/React Native
     usesExclusiveLocking: true,
   });
 
