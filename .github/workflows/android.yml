@@ -42,10 +42,9 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
-          cmdline-tools-version: '16.0'
           accept-android-sdk-licenses: true
 
-      # --- Install SDK packages manually (fix for packages input bug) ---
+      # --- Install SDK packages manually ---
       - name: Install Android SDK packages
         run: |
           sdkmanager "platforms;android-34" "build-tools;34.0.0" "ndk;27.0.12077973" "cmake;3.22.1"
