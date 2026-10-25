@@ -14,6 +14,8 @@ import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint
 import expo.modules.ApplicationLifecycleDispatcher
 import expo.modules.ExpoReactHostFactory
 import expo.modules.sqlite.SQLitePackage
+import com.nozbe.watermelondb.WatermelonDBPackage
+import com.nozbe.watermelondb.jsi.WatermelonDBJSIPackage
 
 class MainApplication : Application(), ReactApplication {
 
@@ -25,6 +27,8 @@ class MainApplication : Application(), ReactApplication {
           // Packages that cannot be autolinked yet can be added manually here, for example:
           // add(MyReactNativePackage())
           add(SQLitePackage())
+          add(com.nozbe.watermelondb.WatermelonDBPackage())
+          add(com.nozbe.watermelondb.jsi.WatermelonDBJSIPackage())
         }
     )
   }

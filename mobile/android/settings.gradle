@@ -38,5 +38,8 @@ expoAutolinking.useExpoVersionCatalog()
 include ':expo-sqlite'
 project(':expo-sqlite').projectDir = new File(rootProject.projectDir, '../node_modules/expo-sqlite/android')
 
+include ':watermelondb-android-jsi'
+project(':watermelondb-android-jsi').projectDir = new File(rootProject.projectDir, '../node_modules/@nozbe/watermelondb/native/android-jsi')
+
 include ':app'
 includeBuild(expoAutolinking.reactNativeGradlePlugin)

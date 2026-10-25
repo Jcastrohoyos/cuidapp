@@ -1,5 +1,5 @@
 import { Database } from '@nozbe/watermelondb';
-import SQLiteAdapter from '@nozbe/watermelondb/adapters/sqlite/expo-sqlite';
+import SQLiteAdapter from '@nozbe/watermelondb/adapters/sqlite';
 import { openDatabaseSync } from 'expo-sqlite';
 import { schema } from './schema';
 import {
