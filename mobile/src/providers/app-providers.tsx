@@ -28,11 +28,19 @@ export function AppProviders({ children }: { children: ReactNode }) {
       .then(async () => {
         if (!mounted) return;
 
-        // 1. Inicializar sistema de notificaciones (permisos, token, handlers)
-        await inicializarNotificaciones();
+        // 1. Inicializar sistema de notificaciones (solo en dispositivo nativo, no en web)
+        try {
+          await inicializarNotificaciones();
+        } catch (e) {
+          console.warn('[AppProviders] Notificaciones no disponibles en esta plataforma:', e.message);
+        }
 
-        // 2. Programar alertas de hoy para perfiles activos
-        await programarTodasLasAlertasDeHoy();
+        // 2. Programar alertas de hoy para perfiles activos (solo en dispositivo nativo)
+        try {
+          await programarTodasLasAlertasDeHoy();
+        } catch (e) {
+          console.warn('[AppProviders] No se pudieron programar alertas:', e.message);
+        }
 
         // 3. Iniciar job de escalado (cada minuto)
         escaladoIntervalRef.current = setInterval(() => {

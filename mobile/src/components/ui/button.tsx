@@ -35,7 +35,7 @@ export const Button = forwardRef<React.ElementRef<typeof Pressable>, ButtonProps
   cargando,
   fullWidth,
   style,
-}: ButtonProps) => {
+}: ButtonProps, ref) => {
   const theme = useTheme();
   const inactivo = disabled || cargando;
 
@@ -49,6 +49,7 @@ export const Button = forwardRef<React.ElementRef<typeof Pressable>, ButtonProps
 
   return (
     <Pressable
+      ref={ref}
       accessibilityRole="button"
       accessibilityLabel={titulo}
       accessibilityState={{ disabled: !!inactivo, busy: !!cargando }}
