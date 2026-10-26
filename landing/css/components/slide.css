@@ -1,0 +1,244 @@
+/* ============================================================
+   SLIDE · Efecto scroll-driven genérico para secciones
+   ============================================================
+
+   Uso:
+     <section class="section slide" id="…">
+       <div class="slide__content">
+         <div class="container slide__inner">
+           … contenido …
+           <ul class="slide-stagger">…</ul>   (opcional)
+         </div>
+       </div>
+     </section>
+
+   Cómo funciona:
+   · Cada `.slide` declara `view-timeline: --section`: un timeline de
+     scroll ligado a su propio recorrido por el viewport.
+   · Su `.slide__content` se fija a la ventana y se anima con
+     `animation-timeline: --section`, entrando desde la derecha,
+     centrada cuando la sección ocupa la pantalla y saliendo por la
+     izquierda.
+   · Los hijos directos del contenido y los elementos de los
+     contenedores `.slide-stagger` aparecen escalonados sobre el mismo
+     timeline.
+
+   Alcance del efecto: solo en pantallas amplias (>= 60rem), donde cada
+   sección cabe en una pantalla. En móvil, o con movimiento reducido, o
+   en navegadores sin scroll-driven animations, cada sección se
+   comporta como una sección estática normal.
+   ============================================================ */
+
+.slide {
+  /* Timeline de scroll propio de la sección */
+  view-timeline: --section;
+
+  /* Punto de anclaje cuando el documento tiene scroll-snap */
+  scroll-snap-align: start;
+}
+
+.slide__content {
+  position: relative;
+}
+
+.slide__inner {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--container-x);
+}
+
+/* ============================================================
+   EFECTO ACTIVO · escritorio + navegador compatible
+   ============================================================ */
+@supports (animation-timeline: --section) {
+  @media (min-width: 60rem) {
+    /* Anclaje suave del documento. `proximity` (en lugar de
+       `mandatory`) evita secuestrar el scroll: el resto de la página
+       se recorre con normalidad. */
+    html { scroll-snap-type: y proximity; }
+
+    .slide {
+      min-height: 100dvh;
+      padding-block: 0;
+      display: grid;
+      align-items: stretch;
+    }
+
+    .slide__content {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+      padding: calc(var(--header-h) + 0.75rem) var(--container-x) 1.75rem;
+      background: var(--slide-bg, var(--bg));
+      overflow: hidden;
+
+      animation: slide-horizontal ease-in-out both;
+      animation-timeline: --section;
+    }
+
+    .slide__inner {
+      max-height: 100%;
+      padding-inline: 0;
+    }
+
+    /* --- Revelado de los bloques del contenido --- */
+    .slide__inner > * {
+      animation: slide-item var(--ease) both;
+      animation-timeline: --section;
+    }
+    .slide__inner > :nth-child(1) { animation-range: 13% 29%; }
+    .slide__inner > :nth-child(2) { animation-range: 15% 31%; }
+    .slide__inner > :nth-child(3) { animation-range: 17% 33%; }
+
+    /* --- Revelado escalonado dentro de rejillas y listas --- */
+    .slide-stagger > * {
+      animation: slide-item var(--ease) both;
+      animation-timeline: --section;
+    }
+    .slide-stagger > :nth-child(1)  { animation-range: 17% 33%; }
+    .slide-stagger > :nth-child(2)  { animation-range: 18.6% 34.6%; }
+    .slide-stagger > :nth-child(3)  { animation-range: 20.2% 36.2%; }
+    .slide-stagger > :nth-child(4)  { animation-range: 21.8% 37.8%; }
+    .slide-stagger > :nth-child(5)  { animation-range: 23.4% 39.4%; }
+    .slide-stagger > :nth-child(6)  { animation-range: 25% 41%; }
+    .slide-stagger > :nth-child(7)  { animation-range: 26.6% 42.6%; }
+    .slide-stagger > :nth-child(8)  { animation-range: 28.2% 44.2%; }
+    .slide-stagger > :nth-child(9)  { animation-range: 29.8% 45.8%; }
+    .slide-stagger > :nth-child(10) { animation-range: 31.4% 47.4%; }
+
+    /* ============================================================
+       COMPACTACIÓN · para que cada sección quepa en una pantalla
+       ============================================================ */
+    .slide .section-head { gap: var(--space-2); }
+    .slide .section-head .lead { font-size: var(--text-base); }
+    .slide .head-gap { margin-top: var(--space-6); }
+    .slide .grid { gap: var(--space-4); }
+
+    /* Tarjetas y paneles */
+    .slide .card { padding: var(--space-4); gap: var(--space-2); }
+    .slide .card__title { font-size: var(--text-base); }
+    .slide .card__text { font-size: var(--text-sm); line-height: 1.5; }
+    .slide .card .icon-tile { width: 2.4rem; height: 2.4rem; }
+    .slide .card .icon-tile .icon { width: 1.2rem; height: 1.2rem; }
+    .slide .panel { padding: var(--space-5); gap: var(--space-3); }
+
+    /* Pasos */
+    .slide .steps { margin-top: var(--space-6); gap: var(--space-4); }
+    .slide .step { padding: var(--space-4) var(--space-4) var(--space-4) 0; }
+    .slide .step__text { font-size: var(--text-sm); }
+
+    /* Planes */
+    .slide .plans { margin-top: var(--space-6); gap: var(--space-4); }
+    .slide .plan { padding: var(--space-5); gap: var(--space-3); }
+
+    /* Diferenciación */
+    .slide .quote { gap: var(--space-8); align-items: center; }
+    .slide .quote__block { margin-top: var(--space-5); gap: var(--space-3); }
+    .slide .quote__list { padding: var(--space-5); gap: var(--space-3); }
+
+    /* Solución */
+    .slide .solution__banner { margin-top: var(--space-4); padding: var(--space-5); }
+    .slide .solution__banner p { font-size: var(--text-base); }
+
+    /* Plataforma */
+    .slide .requirements {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0 var(--space-8);
+    }
+    .slide .requirement { padding: var(--space-2) 0; border-top: 0; }
+
+    /* Alcance inicial */
+    .slide .scope__text { margin-top: var(--space-3); font-size: var(--text-base); }
+    .slide .scope__pills { margin-top: var(--space-5); }
+
+    /* Demo */
+    .slide .demo__layout { margin-top: var(--space-5); gap: var(--space-8); }
+    .slide .demo__features { gap: var(--space-3); }
+    .slide .demo__feature p { font-size: var(--text-sm); }
+    .slide .phone { width: min(17.5rem, 100%); }
+    .slide .demo__note { margin-top: var(--space-5); }
+
+    /* CTA */
+    .slide .cta__inner { gap: var(--space-3); }
+    .slide .form { margin-top: var(--space-3); }
+
+    /* CTA: sección de cierre estática. Ocupa al menos una pantalla
+       para que el último slide salga por completo antes de llegar al
+       footer y no lo tape con su panel fijo. */
+    .cta {
+      min-height: 100dvh;
+      display: grid;
+      align-content: center;
+    }
+
+    /* --- Fondos específicos por sección --- */
+    .section--alt { --slide-bg: var(--bg-alt); }
+    .cta { --slide-bg: var(--cta-bg); }
+    .scope { --slide-bg: var(--scope-bg); }
+
+    /* --- Pantallas de poca altura --- */
+    @media (max-height: 46rem) {
+      .slide__content { padding-block: calc(var(--header-h) + 0.5rem) 1rem; }
+      .slide .section-head .lead { display: none; }
+      .slide .grid { gap: var(--space-3); }
+      .slide .card { padding: var(--space-3); }
+      .slide .steps { margin-top: var(--space-4); }
+      .slide .quote__block { display: none; }
+      .slide .demo__note { display: none; }
+    }
+  }
+}
+
+/* ============================================================
+   MOVIMIENTO REDUCIDO · sección estática
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .slide__content {
+    position: static;
+    inset: auto;
+    background: none;
+    overflow: visible;
+    animation: none;
+    padding: 0;
+    display: block;
+  }
+
+  .slide {
+    min-height: 0;
+    padding-block: var(--section-y);
+  }
+
+  .slide__inner > *,
+  .slide-stagger > * {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+/* ============================================================
+   KEYFRAMES
+   ============================================================ */
+
+/* Entrada y salida horizontal desde el timeline de la sección.
+   `visibility` evita que el contenido fuera de pantalla reciba foco
+   ni sea anunciado por lectores de pantalla. */
+@keyframes slide-horizontal {
+  0% { transform: translate3d(100%, 0, 0); visibility: hidden; }
+  50% { transform: none; visibility: visible; }
+  100% { transform: translate3d(-100%, 0, 0); visibility: hidden; }
+}
+
+/* Aparición individual de cada bloque */
+@keyframes slide-item {
+  from { opacity: 0; transform: translateY(14px); filter: blur(4px); }
+  to { opacity: 1; transform: none; filter: blur(0); }
+}
+
+/* --- Reset para secciones sin .slide --- */
+section:not(.slide) > .slide__content { position: static; inset: auto; background: none; overflow: visible; animation: none; transform: none; }
+section:not(.slide) > .slide__content > .slide__inner { max-height: none; padding-inline: var(--container-x); }

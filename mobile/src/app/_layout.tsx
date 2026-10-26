@@ -1,0 +1,152 @@
+import { Inter_300Light, Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold, Inter_800ExtraBold, useFonts } from '@expo-google-fonts/inter';
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider, type ErrorBoundaryProps } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'expo-status-bar';
+import { useEffect } from 'react';
+import { StyleSheet, useColorScheme, View } from 'react-native';
+
+import { AppProviders } from '@/providers/app-providers';
+import { useEstadoAuth } from '@/hooks/use-auth';
+import { useTheme } from '@/hooks/use-theme';
+import { Text } from '@/components/text';
+import { problemaDeConfiguracion } from '@/api/client';
+import { fam, FontSize, Spacing } from '@/constants/theme';
+
+SplashScreen.preventAutoHideAsync();
+
+/**
+ * Pantalla de error de configuración: el binario se construyó sin backend y
+ * sin permiso de modo demo. Se muestra un mensaje legible en lugar de dejar la
+ * app en blanco (antes `assertApiConfigurado()` lanzaba dentro de un efecto).
+ */
+function ConfiguracionInvalida({ mensaje }: { mensaje: string }) {
+  const theme = useTheme();
+  return (
+    <View style={[styles.config, { backgroundColor: theme.background }]}>
+      <Text style={[styles.configTitulo, { color: theme.text }]}>
+        Cuidapp no está bien configurado
+      </Text>
+      <Text style={[styles.configMensaje, { color: theme.textSecondary }]}>{mensaje}</Text>
+    </View>
+  );
+}
+
+/** Captura los errores de render de las pantallas: mensaje y reintento. */
+export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
+  const theme = useTheme();
+  return (
+    <View style={[styles.config, { backgroundColor: theme.background }]}>
+      <Text style={[styles.configTitulo, { color: theme.text }]}>Algo no ha ido bien</Text>
+      <Text style={[styles.configMensaje, { color: theme.textSecondary }]}>
+        {error?.message ?? 'Se ha producido un error inesperado.'}
+      </Text>
+      <Text
+        style={[styles.configAviso, { color: theme.textSecondary }]}
+        onPress={() => void retry()}
+        accessibilityRole="button"
+        accessibilityLabel="Reintentar"
+      >
+        Volver a intentarlo
+      </Text>
+    </View>
+  );
+}
+
+export default function RootLayout() {
+  const esquema = useColorScheme();
+  const estado = useEstadoAuth();
+  const theme = useTheme();
+  const autenticado = estado === 'autenticado';
+  const problema = problemaDeConfiguracion();
+  // Inter: familias por peso (ver `fam()` en constants/theme.ts). Si una fuente
+  // falla, se oculta igualmente el splash: la app usa fallback de sistema.
+  const [fuentesListas, errorFuente] = useFonts({
+    Inter_300Light,
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
+    Inter_800ExtraBold,
+  });
+
+  // Oculta el splash nativo cuando la sesión está restaurada y las fuentes
+  // están listas: el primer fotograma ya sale con Inter.
+  useEffect(() => {
+    if (estado !== 'cargando' && (fuentesListas || errorFuente)) {
+      void SplashScreen.hideAsync();
+    }
+  }, [estado, fuentesListas, errorFuente]);
+
+  return (
+    <ThemeProvider value={esquema === 'dark' ? DarkTheme : DefaultTheme}>
+      {/* 'auto': contraste correcto de la barra de estado en claro y oscuro. */}
+      <StatusBar style="auto" />
+      {problema ? (
+        <ConfiguracionInvalida mensaje={problema} />
+      ) : (
+        <AppProviders>
+          {/* Mientras la sesión está 'cargando' no se monta el Stack: si no, el
+              guard pinta el formulario de login un instante (destello) y el
+              router redirige la ruta profunda original (p. ej. /perfil) a '/'. */}
+          {estado === 'cargando' ? (
+            <View style={[styles.raiz, { backgroundColor: theme.background }]} />
+          ) : (
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                contentStyle: { backgroundColor: theme.background },
+              }}>
+              {/* Sin sesión: solo autenticación */}
+              <Stack.Protected guard={!autenticado}>
+                <Stack.Screen name="(auth)" />
+              </Stack.Protected>
+
+              {/* Con sesión: experiencia completa. Toda pantalla apilada debe
+                  declararse aquí: las rutas fuera de Stack.Protected quedan
+                  siempre accesibles (doc Expo: "Protected crea excepciones"). */}
+              <Stack.Protected guard={autenticado}>
+                <Stack.Screen name="(tabs)" />
+                <Stack.Screen name="cuidado/[id]" />
+                <Stack.Screen name="cuidado/nuevo" options={{ presentation: 'modal' }} />
+                <Stack.Screen name="cuenta" options={{ presentation: 'modal' }} />
+                <Stack.Screen name="publicar" options={{ presentation: 'modal' }} />
+                <Stack.Screen name="seleccion" />
+                <Stack.Screen name="servicios" />
+                <Stack.Screen name="informes" />
+                <Stack.Screen name="perfil" />
+                <Stack.Screen name="rutina/nueva" />
+                <Stack.Screen name="ayuda" />
+              </Stack.Protected>
+            </Stack>
+          )}
+        </AppProviders>
+      )}
+    </ThemeProvider>
+  );
+}
+
+const styles = StyleSheet.create({
+  raiz: { flex: 1 },
+  config: {
+    flex: 1,
+    padding: Spacing.four,
+    justifyContent: 'center',
+    gap: Spacing.three,
+  },
+  configTitulo: {
+    fontFamily: fam(800),
+    fontSize: FontSize.xl,
+    fontWeight: '800',
+  },
+  configMensaje: {
+    fontFamily: fam(400),
+    fontSize: FontSize.base,
+    lineHeight: 24,
+  },
+  configAviso: {
+    fontFamily: fam(700),
+    fontSize: FontSize.base,
+    fontWeight: '700',
+    textDecorationLine: 'underline',
+  },
+});

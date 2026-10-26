@@ -1,0 +1,48 @@
+/* ============================================================
+   ICONS · Iconografía SVG (stroke, hereda currentColor)
+   ============================================================ */
+
+.icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.icon--sm { width: 1rem; height: 1rem; }
+.icon--lg { width: 1.5rem; height: 1.5rem; }
+.icon--xl { width: 2rem; height: 2rem; }
+
+/* Tile decorativo que envuelve un icono */
+.icon-tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--radius-md);
+  background: var(--primary-soft);
+  color: var(--primary);
+  border: 1px solid var(--primary-soft-strong);
+}
+
+.icon-tile--accent {
+  background: var(--accent-soft);
+  color: var(--accent-600);
+  border-color: rgba(245, 158, 11, 0.22);
+}
+
+.icon-tile--onDark {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+
+.icon-tile .icon {
+  width: 1.35rem;
+  height: 1.35rem;
+}

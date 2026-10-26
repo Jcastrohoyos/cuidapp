@@ -1,0 +1,606 @@
+/* ============================================================
+   JOURNEY · Recorrido del pilar familiar (demo interactiva)
+   ============================================================ */
+
+.journey__layout {
+  margin-top: var(--space-12);
+  display: grid;
+  grid-template-columns: minmax(0, 21rem) minmax(0, 1fr);
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: start;
+}
+
+/* ============================================================
+   TIMELINE DE PASOS
+   ============================================================ */
+
+.journey__steps {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.journey__item {
+  position: relative;
+}
+
+/* Conector entre pasos (itinerario) */
+.journey__item:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: calc(0.85rem + 1.075rem - 1px);
+  top: calc(100% + 0.08rem);
+  width: 2px;
+  height: calc(var(--space-2) - 0.16rem);
+  background: var(--border-strong);
+}
+
+.journey__step {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  text-align: left;
+  transition:
+    background-color var(--dur-fast) var(--ease),
+    border-color var(--dur-fast) var(--ease),
+    box-shadow var(--dur-fast) var(--ease);
+}
+
+.journey__step:hover {
+  background: var(--surface-2);
+}
+
+.journey__step.is-active {
+  background: var(--surface);
+  border-color: var(--border);
+  box-shadow: var(--shadow-md);
+}
+
+.journey__num {
+  display: grid;
+  place-items: center;
+  width: 2.15rem;
+  height: 2.15rem;
+  flex: none;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: 800;
+  color: var(--ink-3);
+  transition:
+    background-color var(--dur-fast) var(--ease),
+    border-color var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease);
+}
+
+.journey__step.is-active .journey__num {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--ink-onPrimary);
+}
+
+.journey__step-text {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.journey__step-title {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+.journey__step.is-active .journey__step-title {
+  color: var(--primary);
+}
+
+.journey__step-sub {
+  font-size: var(--text-xs);
+  color: var(--ink-3);
+  line-height: 1.45;
+}
+
+/* ============================================================
+   PANELES DE CONTENIDO
+   ============================================================ */
+
+.journey__main {
+  display: grid;
+  gap: var(--space-8);
+  min-width: 0;
+}
+
+.journey-panel {
+  display: none;
+}
+
+.journey-panel.is-active {
+  display: grid;
+  gap: var(--space-4);
+  animation: journey-panel-in 420ms var(--ease) both;
+}
+
+@keyframes journey-panel-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.journey-panel__kicker {
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  font-weight: 800;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+.journey-panel__title {
+  font-size: var(--text-2xl);
+}
+
+.journey-panel__text {
+  max-width: 38rem;
+  color: var(--ink-2);
+  line-height: var(--leading-normal);
+}
+
+.journey-panel__list {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.journey-panel__list li {
+  display: flex;
+  gap: var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+  line-height: 1.55;
+}
+
+.journey-panel__list .icon {
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.2rem;
+  color: var(--primary);
+}
+
+.journey-panel__result {
+  display: flex;
+  gap: var(--space-3);
+  max-width: 38rem;
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--primary-soft-strong);
+  background: var(--primary-soft);
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+  line-height: 1.55;
+}
+
+.journey-panel__result strong {
+  color: var(--ink);
+}
+
+.journey-panel__result .icon {
+  margin-top: 0.2rem;
+  color: var(--primary);
+}
+
+/* ============================================================
+   ESCENARIO DEL TELÉFONO
+   ============================================================ */
+
+.journey__stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.journey__glow {
+  position: absolute;
+  inset: 6% -12%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--glow-1), transparent);
+  filter: blur(10px);
+}
+
+/* ============================================================
+   CONTROLES ANTERIOR / SIGUIENTE
+   ============================================================ */
+
+.journey__controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+}
+
+.journey__ctrl {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.55rem 1.15rem;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--ink-2);
+  transition:
+    border-color var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease),
+    background-color var(--dur-fast) var(--ease);
+}
+
+.journey__ctrl:hover:not(:disabled) {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.journey__ctrl:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.journey__ctrl--prev .icon {
+  transform: rotate(180deg);
+}
+
+.journey__counter {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================
+   APP · COMPONENTES ESPECÍFICOS DEL RECORRIDO
+   ============================================================ */
+
+/* --- Campos de formulario (mockup) --- */
+.app-field {
+  margin-top: 0.6rem;
+}
+
+.app-field__label {
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.app-field__input {
+  margin-top: 0.25rem;
+  padding: 0.45rem 0.6rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  font-size: 0.68rem;
+  color: var(--ink-2);
+}
+
+/* --- Filas clave-valor --- */
+.app-kv {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.app-kv__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font-size: 0.66rem;
+}
+
+.app-kv__key {
+  color: var(--ink-3);
+}
+
+.app-kv__val {
+  font-weight: 600;
+  color: var(--ink);
+  text-align: right;
+}
+
+/* --- Distintivos de estado --- */
+.app-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  flex: none;
+  padding: 0.14rem 0.5rem;
+  border-radius: var(--radius-full);
+  font-size: 0.58rem;
+  font-weight: 800;
+}
+
+.app-badge--ok {
+  background: var(--primary-soft-strong);
+  color: var(--primary-700);
+}
+
+[data-theme="dark"] .app-badge--ok {
+  color: var(--primary-300);
+}
+
+.app-badge--new {
+  background: var(--accent-soft);
+  color: var(--accent-600);
+}
+
+[data-theme="dark"] .app-badge--new {
+  color: var(--accent-400);
+}
+
+.app-badge--ghost {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--ink-2);
+}
+
+/* --- Avisos dentro de la app --- */
+.app-note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin-top: 0.7rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--border-strong);
+  background: var(--surface-2);
+  font-size: 0.62rem;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+
+.app-note .icon {
+  width: 0.8rem;
+  height: 0.8rem;
+  margin-top: 0.05rem;
+  color: var(--primary);
+}
+
+/* --- Candidatos (comparación) --- */
+.app-candidates {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.app-candidate {
+  padding: 0.65rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.app-candidate__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.app-candidate__who {
+  min-width: 0;
+}
+
+.app-candidate__name {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.app-candidate__name .icon {
+  width: 0.72rem;
+  height: 0.72rem;
+  color: var(--primary);
+}
+
+.app-candidate__meta {
+  margin-top: 0.1rem;
+  font-size: 0.6rem;
+  color: var(--ink-3);
+}
+
+/* --- Servicios complementarios --- */
+.app-service {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: 0.5rem;
+  padding: 0.6rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.app-service .icon-tile {
+  width: 2.3rem;
+  height: 2.3rem;
+  border-radius: var(--radius-sm);
+}
+
+.app-service .icon-tile .icon {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.app-service__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.app-service__name {
+  font-family: var(--font-display);
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.app-service__meta {
+  margin-top: 0.1rem;
+  font-size: 0.62rem;
+  color: var(--ink-3);
+}
+
+/* --- Adherencia a rutinas (informes) --- */
+.app-adherence {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.app-adherence__row {
+  display: grid;
+  grid-template-columns: 4.2rem minmax(0, 1fr) 2.4rem;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.62rem;
+}
+
+.app-adherence__name {
+  color: var(--ink-3);
+}
+
+.app-adherence__val {
+  font-weight: 700;
+  color: var(--ink);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Gráfico de barras (historial) --- */
+.app-chart {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.3rem;
+  height: 4.4rem;
+}
+
+.app-chart__col {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 0.25rem;
+  justify-items: center;
+  height: 100%;
+  min-height: 0;
+}
+
+.app-chart__bar {
+  align-self: end;
+  width: 100%;
+  min-height: 6%;
+  border-radius: 0.2rem 0.2rem 0 0;
+  background: linear-gradient(180deg, var(--primary-400), var(--primary-600));
+}
+
+.app-chart__day {
+  font-size: 0.55rem;
+  font-weight: 600;
+  color: var(--ink-3);
+}
+
+.app-chart__note {
+  margin-top: 0.5rem;
+}
+
+/* --- Registros del historial --- */
+.app-record {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: 0.5rem;
+  padding: 0.55rem 0.6rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.app-record .icon-tile {
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: var(--radius-sm);
+}
+
+.app-record .icon-tile .icon {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+.app-record__body {
+  min-width: 0;
+}
+
+.app-record__title {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.app-record__meta {
+  margin-top: 0.05rem;
+  font-size: 0.6rem;
+  color: var(--ink-3);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 64rem) {
+  .journey__layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .journey__steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .journey__item:not(:last-child)::after {
+    display: none;
+  }
+
+  .journey__stage {
+    margin-top: var(--space-4);
+  }
+}
+
+@media (max-width: 34rem) {
+  .journey__steps {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .journey__step {
+    padding: var(--space-3);
+  }
+
+  .journey__controls {
+    flex-wrap: wrap;
+  }
+}
+
+/* ============================================================
+   MOVIMIENTO REDUCIDO
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .journey-panel.is-active {
+    animation: none;
+  }
+}

@@ -1,0 +1,31 @@
+/* ============================================================
+   MAIN · Punto de entrada. Importa todos los módulos en orden.
+   ============================================================ */
+
+@import url("./tokens.css");
+@import url("./base.css");
+@import url("./utilities.css");
+@import url("./animations.css");
+
+/* Componentes */
+@import url("./components/buttons.css");
+@import url("./components/icons.css");
+@import url("./components/header.css");
+@import url("./components/hero.css");
+@import url("./components/card.css");
+@import url("./components/section-head.css");
+@import url("./components/problem.css");
+@import url("./components/solution.css");
+@import url("./components/how.css");
+@import url("./components/slide.css");
+@import url("./components/demo.css");
+@import url("./components/app.css");
+@import url("./components/journey.css");
+@import url("./components/users.css");
+@import url("./components/quote.css");
+@import url("./components/model.css");
+@import url("./components/platform.css");
+@import url("./components/scope.css");
+@import url("./components/cta.css");
+@import url("./components/crm.css");
+@import url("./components/cognitive.css");

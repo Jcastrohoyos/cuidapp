@@ -1,0 +1,15 @@
+/* ============================================================
+   USERS · Usuarios principales
+   ============================================================ */
+
+.users__grid {
+  margin-top: var(--space-12);
+}
+
+.users .card {
+  gap: var(--space-3);
+}
+
+.users .card .icon-tile { margin-bottom: var(--space-1); }
+
+.users .card__title { font-size: var(--text-lg); }

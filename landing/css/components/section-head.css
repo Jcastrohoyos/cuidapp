@@ -1,0 +1,65 @@
+/* ============================================================
+   SECTION HEAD · Cabecera reutilizable de sección
+   ============================================================ */
+
+.section-head {
+  max-width: 45rem;
+  display: grid;
+  gap: var(--space-4);
+}
+
+.section-head h2 {
+  position: relative;
+  padding-bottom: var(--space-3);
+}
+
+.section-head h2::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 3.5rem;
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--primary-500), transparent);
+}
+
+.section-head--center h2::after {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.section-head--center {
+  margin-inline: auto;
+  text-align: center;
+  justify-items: center;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  font-weight: 800;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+.eyebrow::before {
+  content: "";
+  width: 1.5rem;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+}
+
+.eyebrow--accent { color: var(--accent-600); }
+[data-theme="dark"] .eyebrow--accent { color: var(--accent-400); }
+
+.section-head .lead {
+  font-size: var(--text-lg);
+  color: var(--ink-2);
+  line-height: var(--leading-normal);
+}

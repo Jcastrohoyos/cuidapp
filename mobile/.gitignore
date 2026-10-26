@@ -1,0 +1,45 @@
+# dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+*.jks
+*.p8
+*.p12
+*.pem
+*.key
+*.mobileprovision
+*.orig.*
+
+# Metro
+.metro-health-check*
+
+# testing
+coverage/
+
+# env
+.env
+.env.local
+.env.*.local
+# Archivos .env por perfil de Expo (.env.development, .env.preview,
+# .env.production…): pueden contener URLs y claves del backend.
+.env.*
+# El ejemplo sí se versiona: es la plantilla de los anteriores.
+!.env.example
+
+# logs
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+*.log
+
+# editors
+.idea/
+.vscode/
+*.swp
+.DS_Store

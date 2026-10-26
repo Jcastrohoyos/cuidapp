@@ -1,0 +1,50 @@
+/* ============================================================
+   SOLUTION · Sección "La solución"
+   ============================================================ */
+
+.solution__grid {
+  margin-top: var(--space-12);
+}
+
+.solution .card {
+  gap: var(--space-3);
+}
+
+.solution .card .icon-tile { margin-bottom: var(--space-1); }
+
+.solution .card__text strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* Banner de colaboradores */
+.solution__banner {
+  margin-top: var(--space-6);
+  padding: var(--space-8);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(120deg, var(--primary-700), var(--primary-800) 60%, var(--primary-900));
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  box-shadow: var(--shadow-lg);
+}
+
+.solution__banner .icon-tile {
+  width: 3rem;
+  height: 3rem;
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: #fff;
+}
+
+.solution__banner p {
+  font-size: var(--text-lg);
+  line-height: var(--leading-normal);
+}
+
+.solution__banner strong { color: #fff; font-weight: 700; }
+
+@media (max-width: 48rem) {
+  .solution__banner { flex-direction: column; align-items: flex-start; padding: var(--space-6); }
+}

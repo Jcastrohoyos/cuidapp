@@ -1,0 +1,2162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cuidapp · Plataforma digital de cuidados a domicilio</title>
+  <meta name="description" content="Cuidapp conecta a familias con cuidadores profesionales: compara competencias y disponibilidad, elige con información suficiente y organiza los cuidados de forma continuada." />
+  <meta name="author" content="Cuidapp" />
+  <meta name="theme-color" content="#0d9488" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Cuidapp · Cuidados a domicilio" />
+  <meta property="og:description" content="La plataforma que conecta a familias con cuidadores profesionales y da seguimiento continuo a los cuidados." />
+  <meta property="og:type" content="website" />
+
+  <!-- Tema: se aplica antes de pintar para evitar destellos -->
+  <script>
+    (function () {
+      try {
+        var stored = localStorage.getItem("cuidapp-theme");
+        var theme = stored || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.setAttribute("data-theme", theme);
+      } catch (e) {
+        document.documentElement.setAttribute("data-theme", "light");
+      }
+    })();
+  </script>
+
+  <!-- Si no hay JS, el contenido debe mostrarse igualmente -->
+  <noscript>
+    <style>
+      .reveal { opacity: 1; transform: none; }
+      .mobile-nav[hidden] { display: none; }
+    </style>
+  </noscript>
+
+  <!-- Fuentes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Icono: SVG en línea (sin archivo extra, evita el 404 de /favicon.ico) -->
+  <link
+    rel="icon"
+    type="image/svg+xml"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230d9488'/%3E%3Cpath d='M16 8a5 5 0 0 0-5 5v2H9.5A1.5 1.5 0 0 0 8 16.5v5A1.5 1.5 0 0 0 9.5 23h13a1.5 1.5 0 0 0 1.5-1.5v-5a1.5 1.5 0 0 0-1.5-1.5H21v-2a5 5 0 0 0-5-5Zm0 2.5a2.5 2.5 0 0 1 2.5 2.5v2h-5v-2A2.5 2.5 0 0 1 16 10.5Z' fill='white'/%3E%3C/svg%3E"
+  />
+
+  <!-- Hoja de estilos principal (arquitectura modular) -->
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+
+<body>
+  <a class="skip-link" href="#main">Saltar al contenido</a>
+
+  <!-- ============================================================
+       SPRITE DE ICONOS
+       ============================================================ -->
+  <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l8.84 8.84 8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M3.75 7h16.5M3.75 12h16.5M3.75 17h16.5"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4L6 18M18 6l1.4-1.4"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></symbol>
+    <symbol id="i-caregiver" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 21c0-4.1 3.4-6.5 7.5-6.5s7.5 2.4 7.5 6.5"/></symbol>
+    <symbol id="i-briefcase" viewBox="0 0 24 24"><rect x="2.5" y="7.5" width="19" height="13" rx="2"/><path d="M8.5 7.5V6A1.5 1.5 0 0 1 10 4.5h4A1.5 1.5 0 0 1 15.5 6v1.5M2.5 12.5h19"/></symbol>
+    <symbol id="i-award" viewBox="0 0 24 24"><circle cx="12" cy="9" r="5.5"/><path d="M8.6 13.5 7 21l5-2.8L17 21l-1.6-7.5"/></symbol>
+    <symbol id="i-activity" viewBox="0 0 24 24"><path d="M21 12h-4l-3 8-4-16-3 8H3"/></symbol>
+    <symbol id="i-building" viewBox="0 0 24 24"><path d="M4 21V6a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v15M15 10h4a1 1 0 0 1 1 1v10M7.5 9h3M7.5 12.5h3M7.5 16h3M2.5 21h19"/></symbol>
+    <symbol id="i-clipboard" viewBox="0 0 24 24"><path d="M9 4.5H7.5A1.5 1.5 0 0 0 6 6v13.5A1.5 1.5 0 0 0 7.5 21h9a1.5 1.5 0 0 0 1.5-1.5V6A1.5 1.5 0 0 0 16.5 4.5H15"/><rect x="9" y="2.5" width="6" height="4" rx="1.5"/><path d="M9 11h6M9 15h4"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 3 3 7.5l9 4.5 9-4.5zM3 12.5 12 17l9-4.5M3 17 12 21.5 21 17"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.9-3.9"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 20v-1.5a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4V20"/><circle cx="9.5" cy="7.5" r="3.5"/><path d="M21 20v-1.5a4 4 0 0 0-3-3.85M15.5 4.15a3.5 3.5 0 0 1 0 6.7"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M4.5 10.5 9 15l10.5-10.5"/></symbol>
+    <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M4.5 12h15m-5.5-6 6 6-6 6"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M3 7.5l9 6 9-6"/></symbol>
+    <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M11 3.5l1.6 4.1 4.1 1.6-4.1 1.6L11 14.9l-1.6-4.1L5.3 9.2l4.1-1.6z"/><path d="M18.2 15.2l.75 1.9 1.9.75-1.9.75-.75 1.9-.75-1.9-1.9-.75 1.9-.75z"/></symbol>
+    <symbol id="i-shield-check" viewBox="0 0 24 24"><path d="M12 3 5 5.8v5.4c0 4.6 3 7.9 7 9.8 4-1.9 7-5.2 7-9.8V5.8z"/><path d="M9.2 11.8l2 2 3.6-3.9"/></symbol>
+    <symbol id="i-signal" viewBox="0 0 24 24"><path d="M4 20v-4M9.3 20v-7M14.7 20v-10M20 20V7"/></symbol>
+    <symbol id="i-wifi" viewBox="0 0 24 24"><path d="M2.5 9.2a14 14 0 0 1 19 0M5.5 12.7a9.5 9.5 0 0 1 13 0M8.6 16.1a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.6" r="1.1" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-battery" viewBox="0 0 24 24"><rect x="2" y="7.5" width="18" height="9" rx="2.5"/><path d="M21.8 10.8v2.4" stroke-width="2.4"/><rect x="4.2" y="9.7" width="11" height="4.6" rx="1.2" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 17l-5.2 2.7 1-5.9L3.5 9.7l5.9-.8z"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 8.5a6 6 0 1 0-12 0c0 6-2.5 7.5-2.5 7.5h17S18 14.5 18 8.5z"/><path d="M13.7 20a2 2 0 0 1-3.4 0"/></symbol>
+    <symbol id="i-map-pin" viewBox="0 0 24 24"><path d="M19.5 10.5c0 6-7.5 11-7.5 11s-7.5-5-7.5-11a7.5 7.5 0 0 1 15 0z"/><circle cx="12" cy="10.5" r="2.75"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+    <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h9M17.5 7H20M4 17h3M11.5 17H20"/><circle cx="15.5" cy="7" r="2"/><circle cx="9.5" cy="17" r="2"/></symbol>
+    <symbol id="i-id-card" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2.1"/><path d="M5.8 16.2c.5-1.6 1.8-2.5 3.2-2.5s2.7.9 3.2 2.5M14.5 9.8H18M14.5 13H18"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5.5" y="10.5" width="13" height="9" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.8 12 5.8 21.5 12 21.5 12 18 18.2 12 18.2 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.9"/></symbol>
+    <symbol id="i-file-text" viewBox="0 0 24 24"><path d="M14 3.5H7.5A1.5 1.5 0 0 0 6 5v14a1.5 1.5 0 0 0 1.5 1.5h9a1.5 1.5 0 0 0 1.5-1.5V7.5z"/><path d="M14 3.5V7.5H18M9 12h6M9 15.5h4"/></symbol>
+    <symbol id="i-droplet" viewBox="0 0 24 24"><path d="M12 3.5s6.2 6.3 6.2 10.4a6.2 6.2 0 0 1-12.4 0C5.8 9.8 12 3.5 12 3.5z"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5.5v13M5.5 12h13"/></symbol>
+    <symbol id="i-paper-plane" viewBox="0 0 24 24"><path d="M2 21l1.94-2.44c.05-.06.21-.26.39-.42l1.94-1.73 1.93 1.7c.13.11.29.17.47.17h13c.55 0 1.06-.36 1.22-.9l2.47-5.97c.18-.44.05-1-.3-1.17l-1.94-0.9c-.06-.03-1.06-.49-1.3-.56l-4.62-1.26c-.24-.06-.48-.16-.73-.29l-1.22-2.44c-.1-.2-.27-.33-.49-.37h-7.5c-.55 0-1.06.36-1.22.9l-2.47 5.97c-.18.44-.05 1 .3 1.17l1.94 0.9c.06.03 1.06.49 1.3.56l4.62 1.26c.24.06.48.16.73.29l1.22 2.44c.1.2.27.33.49.37h7.5c.55 0 1.06-.36 1.22-.9l2.47-5.97c.18-.44.05-1-.3-1.17l-1.94-0.9c-.06-.03-1.06-.49-1.3-.56l-4.62-1.26c-.24-.06-.48-.16-.73-.29L18.06 3H5.34L2 21z"/></symbol>
+    <symbol id="i-brain" viewBox="0 0 24 24"><path d="M12 5a3 3 0 0 0-3 3 3 3 0 0 0-2 5.2A3 3 0 0 0 9 17.8 3 3 0 0 0 12 20a3 3 0 0 0 3-2.2 3 3 0 0 0 2-4.6A3 3 0 0 0 15 8a3 3 0 0 0-3-3Z"/><path d="M12 5v15"/></symbol>
+    <symbol id="i-volume" viewBox="0 0 24 24"><path d="M4 9.5h3L11 6v12l-4-3.5H4z"/><path d="M14.5 9.5a3.5 3.5 0 0 1 0 5M17 7a7 7 0 0 1 0 10"/></symbol>
+    <symbol id="i-puzzle" viewBox="0 0 24 24"><path d="M9.5 4.5h5v2.2a1.8 1.8 0 1 0 3.4 0V4.5h2.1v5.2a1.8 1.8 0 1 0 0 3.4v6.4h-6.4a1.8 1.8 0 1 0-3.4 0v-1.8H4.5v-5.2a1.8 1.8 0 1 0 0-3.4V4.5h5z"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l2.8-2.8a4 4 0 0 0-5.7-5.7L11.5 7"/><path d="M14 10a4 4 0 0 0-5.7 0l-2.8 2.8a4 4 0 0 0 5.7 5.7L12.5 17"/></symbol>
+    <symbol id="i-maze" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="2"/><path d="M8 3.5v5h5v6h-5v6"/><path d="M20.5 9.5h-4v5"/></symbol>
+    <symbol id="i-face" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M8.5 14.5a4.5 4.5 0 0 0 7 0"/><path d="M9.5 9.5h.01M14.5 9.5h.01"/></symbol>
+    <symbol id="i-palette" viewBox="0 0 24 24"><path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.2 0 2-.9 2-2 0-1.3-1-1.7-1-2.8 0-.8.7-1.2 1.5-1.2H16a4.5 4.5 0 0 0 4.5-4.5C20.5 6.3 16.7 3.5 12 3.5Z"/><path d="M8 9h.01M12 7h.01M16 9h.01"/></symbol>
+    <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M15.5 4.5 19.5 8.5 8.5 19.5H4.5v-4z"/><path d="M13.5 6.5 17.5 10.5"/></symbol>
+    <symbol id="i-word" viewBox="0 0 24 24"><path d="M4 6.5h16M4 12h11M4 17.5h7"/><path d="M17.5 14.5 20.5 17.5l-3 3-3-3z"/></symbol>
+  </svg>
+
+  <!-- ============================================================
+       HEADER
+       ============================================================ -->
+  <header class="site-header" id="site-header">
+    <div class="container site-header__inner">
+      <a class="brand" href="#inicio" aria-label="Cuidapp, inicio">
+        <span class="brand__mark"><svg class="icon" aria-hidden="true"><use href="#i-heart"></use></svg></span>
+        <span class="brand__name">Cuid<em>app</em></span>
+      </a>
+
+      <nav class="nav" aria-label="Navegación principal">
+        <ul class="nav__list">
+          <li><a class="nav__link" href="#problema">El problema</a></li>
+          <li><a class="nav__link" href="#como-funciona">Cómo funciona</a></li>
+          <li><a class="nav__link" href="#recorrido">Recorrido familiar</a></li>
+          <li><a class="nav__link" href="#cognitivas">Rutinas cognitivas</a></li>
+          <li><a class="nav__link" href="#usuarios">Para quién es</a></li>
+          <li><a class="nav__link" href="#modelo">Modelo</a></li>
+          <li><a class="nav__link" href="#diferenciacion">Diferenciación</a></li>
+        </ul>
+      </nav>
+
+      <div class="site-header__actions">
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Cambiar tema claro/oscuro">
+          <svg class="icon icon--sun" aria-hidden="true"><use href="#i-sun"></use></svg>
+          <svg class="icon icon--moon" aria-hidden="true"><use href="#i-moon"></use></svg>
+        </button>
+        <a class="btn btn--primary btn--sm" href="#cta">Acceso anticipado</a>
+        <button class="menu-toggle" id="menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-nav" aria-label="Abrir menú">
+          <svg class="icon icon--menu" aria-hidden="true"><use href="#i-menu"></use></svg>
+          <svg class="icon icon--close" aria-hidden="true"><use href="#i-close"></use></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="mobile-nav" id="mobile-nav" hidden>
+      <div class="container">
+        <ul class="mobile-nav__list">
+          <li><a class="mobile-nav__link" href="#problema">El problema</a></li>
+          <li><a class="mobile-nav__link" href="#como-funciona">Cómo funciona</a></li>
+          <li><a class="mobile-nav__link" href="#recorrido">Recorrido familiar</a></li>
+          <li><a class="mobile-nav__link" href="#cognitivas">Rutinas cognitivas</a></li>
+          <li><a class="mobile-nav__link" href="#usuarios">Para quién es</a></li>
+          <li><a class="mobile-nav__link" href="#modelo">Modelo</a></li>
+          <li><a class="mobile-nav__link" href="#diferenciacion">Diferenciación</a></li>
+        </ul>
+        <a class="btn btn--primary btn--block" href="#cta">Solicitar acceso anticipado</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- ============================================================
+         HERO
+         ============================================================ -->
+    <section class="hero" id="inicio">
+      <div class="container hero__inner">
+        <div class="hero__content">
+          <span class="hero__tag">
+            <span class="dot" aria-hidden="true"></span>
+            Plataforma en desarrollo · acceso anticipado
+          </span>
+
+          <h1 class="hero__title">Encuentra a la persona <em>adecuada</em> para cuidar a tu familiar</h1>
+
+          <p class="hero__lead">
+            Cuidapp es la plataforma digital que conecta a familias con cuidadores profesionales.
+            Compara competencias y disponibilidad, elige con información suficiente y organiza
+            los cuidados de forma continuada.
+          </p>
+
+          <div class="hero__actions">
+            <a class="btn btn--primary btn--arrow" href="#cta">
+              Solicitar acceso anticipado
+              <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"></use></svg>
+            </a>
+            <a class="btn btn--outline" href="#como-funciona">Ver cómo funciona</a>
+          </div>
+
+          <dl class="hero__stats">
+            <div>
+              <dt>6 perfiles</dt>
+              <dd>tipos de usuario en el ecosistema</dd>
+            </div>
+            <div>
+              <dt>360°</dt>
+              <dd>seguimiento tras la contratación</dd>
+            </div>
+            <div>
+              <dt>Freemium</dt>
+              <dd>acceso gratuito inicial</dd>
+            </div>
+          </dl>
+        </div>
+
+        <div class="hero__visual reveal">
+          <div class="hero__glow" aria-hidden="true"></div>
+
+          <div class="hero-chip hero-chip--b">
+            <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-id-card"></use></svg></span>
+            <span>
+              <span class="hero-chip__label">Perfiles con</span><br />
+              <span class="hero-chip__value">verificación documental</span>
+            </span>
+          </div>
+
+          <article class="match-card">
+            <header class="match-card__head">
+              <span class="avatar" aria-hidden="true">AM</span>
+              <div class="match-card__who">
+                <p class="match-card__name">Ana M. · Madrid</p>
+                <p class="match-card__meta">Busca cuidadora · 40 h/semana</p>
+              </div>
+              <span class="match-card__score">92%</span>
+            </header>
+
+            <ul class="match-card__list">
+              <li class="match-row">
+                <span class="avatar" aria-hidden="true">LR</span>
+                <div class="match-row__info">
+                  <p class="match-row__name">Laura R. · Cuidadora geriátrica</p>
+                  <div class="bar"><div class="bar__fill" style="width:94%; --bar-delay:250ms"></div></div>
+                </div>
+                <span class="match-row__score">94%</span>
+              </li>
+              <li class="match-row">
+                <span class="avatar avatar--b" aria-hidden="true">MS</span>
+                <div class="match-row__info">
+                  <p class="match-row__name">Marta S. · Auxiliar de enfermería</p>
+                  <div class="bar"><div class="bar__fill" style="width:91%; --bar-delay:400ms"></div></div>
+                </div>
+                <span class="match-row__score">91%</span>
+              </li>
+              <li class="match-row">
+                <span class="avatar avatar--d" aria-hidden="true">CD</span>
+                <div class="match-row__info">
+                  <p class="match-row__name">Carlos D. · Atención domiciliaria</p>
+                  <div class="bar"><div class="bar__fill" style="width:88%; --bar-delay:550ms"></div></div>
+                </div>
+                <span class="match-row__score">88%</span>
+              </li>
+            </ul>
+
+            <p class="match-card__note">
+              <svg class="icon icon--sm" aria-hidden="true"><use href="#i-sparkles"></use></svg>
+              <span><strong>Compatibilidad explicable:</strong> cada recomendación indica por qué encaja con las necesidades registradas.</span>
+            </p>
+          </article>
+
+          <div class="hero-chip hero-chip--a">
+            <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-calendar"></use></svg></span>
+            <span>
+              <span class="hero-chip__label">Rutina semanal</span><br />
+              <span class="hero-chip__value">Lun–Vie · 09:00–13:00</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         PROBLEMA
+         ============================================================ -->
+    <section class="section problem" id="problema">
+      <div class="slide__content">
+        <div class="slide__inner">
+          <header class="section-head">
+            <span class="eyebrow eyebrow--accent">El problema</span>
+            <h2>Encontrar un cuidador no debería ser una carrera de obstáculos</h2>
+            <p class="lead">Hoy las familias dependen de agencias, recomendaciones personales o portales de empleo, y los profesionales carecen de herramientas para visibilizar su experiencia.</p>
+          </header>
+
+          <div class="problem__panels ">
+            <article class="panel">
+              <span class="icon-tile icon-tile--accent"><svg class="icon" aria-hidden="true"><use href="#i-home"></use></svg></span>
+              <h3 class="panel__title">Para las familias</h3>
+              <p class="panel__text">
+                Depender de agencias, recomendaciones personales o portales de empleo
+                <strong>dificulta la comparación directa de profesionales</strong> y genera costes
+                iniciales de selección y gestión.
+              </p>
+            </article>
+
+            <article class="panel">
+              <span class="icon-tile icon-tile--accent"><svg class="icon" aria-hidden="true"><use href="#i-caregiver"></use></svg></span>
+              <h3 class="panel__title">Para los cuidadores</h3>
+              <p class="panel__text">
+                Necesitan <strong>visibilidad, oportunidades laborales y reconocimiento de su
+                experiencia</strong>, además de herramientas para desarrollar su perfil profesional.
+              </p>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SOLUCIÓN
+         ============================================================ -->
+    <section class="section section--alt solution" id="solucion">
+      <div class="slide__content">
+        <div class="slide__inner">
+          <header class="section-head">
+            <span class="eyebrow">La solución</span>
+            <h2>Un entorno común para cada etapa del cuidado</h2>
+            <p class="lead">Cuidapp reúne en una sola plataforma todo lo que familias y profesionales necesitan para conectar, decidir y organizarse.</p>
+          </header>
+
+          <div class="grid grid--4 solution__grid ">
+            <article class="card">
+              <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-clipboard"></use></svg></span>
+              <h3 class="card__title">Necesidades registradas</h3>
+              <p class="card__text">Las familias registran las <strong>necesidades, preferencias y rutinas</strong> de la persona cuidada.</p>
+            </article>
+
+            <article class="card">
+              <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-layers"></use></svg></span>
+              <h3 class="card__title">Perfiles estructurados</h3>
+              <p class="card__text">Los cuidadores crean perfiles profesionales construidos a partir de <strong>competencias y experiencia</strong>.</p>
+            </article>
+
+            <article class="card">
+              <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-search"></use></svg></span>
+              <h3 class="card__title">Búsqueda y coincidencias</h3>
+              <p class="card__text">Un <strong>motor que recomienda candidatos compatibles</strong> con cada necesidad registrada.</p>
+              <div class="card__tags">
+                <span class="card__tag"><svg class="icon" aria-hidden="true"><use href="#i-map-pin"></use></svg>Geográfica</span>
+                <span class="card__tag"><svg class="icon" aria-hidden="true"><use href="#i-sliders"></use></svg>Filtros</span>
+                <span class="card__tag"><svg class="icon" aria-hidden="true"><use href="#i-clock"></use></svg>Disponibilidad</span>
+              </div>
+            </article>
+
+            <article class="card">
+              <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-calendar"></use></svg></span>
+              <h3 class="card__title">Ofertas y seguimiento</h3>
+              <p class="card__text">Publicación de ofertas, recepción de candidaturas y <strong>organización de rutinas y tareas</strong>.</p>
+            </article>
+          </div>
+
+          <div class="solution__banner">
+            <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-users"></use></svg></span>
+            <p>
+              <strong>Colaboradores:</strong> gestorías laborales, formadores, profesionales sanitarios
+              y empresas pueden prestar servicios de gestión laboral, formación y atención especializada
+              dentro de sus competencias.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         CÓMO FUNCIONA
+         ============================================================ -->
+    <section class="section how" id="como-funciona">
+      <div class="slide__content">
+        <div class="slide__inner">
+          <header class="section-head">
+            <span class="eyebrow">Cómo funciona</span>
+            <h2>Del primer contacto al seguimiento continuado</h2>
+          </header>
+
+          <ol class="steps ">
+            <li class="step">
+              <span class="step__num">01</span>
+              <h3 class="step__title">Registra necesidades</h3>
+              <p class="step__text">Crea el perfil de la persona cuidada con necesidades, preferencias y rutinas.</p>
+            </li>
+            <li class="step">
+              <span class="step__num">02</span>
+              <h3 class="step__title">Compara profesionales</h3>
+              <p class="step__text">Explora perfiles verificados con filtros por zona, disponibilidad y competencias.</p>
+            </li>
+            <li class="step">
+              <span class="step__num">03</span>
+              <h3 class="step__title">Conecta y contrata</h3>
+              <p class="step__text">Publica ofertas, recibe solicitudes y candidaturas, y elige con información suficiente.</p>
+            </li>
+            <li class="step">
+              <span class="step__num">04</span>
+              <h3 class="step__title">Organiza y sigue</h3>
+              <p class="step__text">Gestiona rutinas, tareas y seguimiento con el apoyo de colaboradores especializados.</p>
+            </li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         DEMO INTERACTIVA · sección estática (contenido interactivo)
+         ============================================================ -->
+    <section class="section section--alt demo" id="demo">
+      <div class="container">
+        <header class="section-head reveal">
+          <span class="eyebrow">Demo interactiva</span>
+          <h2>Así se ve Cuidapp en el móvil</h2>
+          <p class="lead">
+            Navega por las pantallas principales del producto: el panel de la familia, la búsqueda de
+            profesionales, la rutina diaria que la familia amplía con sus propias tareas y la
+            configuración de Mi cuidador.
+          </p>
+        </header>
+
+        <div class="demo__layout">
+          <div class="demo__copy reveal">
+            <ul class="demo__features">
+              <li class="demo__feature">
+                <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-clipboard"></use></svg></span>
+                <div>
+                  <h3>Panel de la persona cuidada</h3>
+                  <p>Necesidades, preferencias y rutinas siempre a mano desde la pantalla de inicio.</p>
+                </div>
+              </li>
+              <li class="demo__feature">
+                <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-sparkles"></use></svg></span>
+                <div>
+                  <h3>Coincidencias explicables</h3>
+                  <p>Cada recomendación muestra su porcentaje de compatibilidad y el motivo del encaje.</p>
+                </div>
+              </li>
+              <li class="demo__feature">
+                <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-sliders"></use></svg></span>
+                <div>
+                  <h3>Búsqueda con filtros</h3>
+                  <p>Filtra por zona, disponibilidad y profesionales con verificación documental.</p>
+                </div>
+              </li>
+              <li class="demo__feature">
+                <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-calendar"></use></svg></span>
+                <div>
+                  <h3>Rutinas que la familia amplía</h3>
+                  <p>Organiza las tareas del día y añade nuevas: a diario o solo para hoy, con un toque.</p>
+                </div>
+              </li>
+              <li class="demo__feature">
+                <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-caregiver"></use></svg></span>
+                <div>
+                  <h3>Mi cuidador</h3>
+                  <p>Perfil, acuerdos y permisos: decides qué datos ve y qué puede hacer en la app.</p>
+                </div>
+              </li>
+            </ul>
+            <p class="demo__note">Demo ilustrativa · refleja el Pilar 1 · La familia · datos de ejemplo</p>
+          </div>
+
+          <div class="demo__stage reveal" style="--reveal-delay:120ms">
+            <div class="phone">
+              <span class="phone__glow" aria-hidden="true"></span>
+
+              <div class="phone__frame">
+                <span class="phone__island" aria-hidden="true"></span>
+                <span class="phone__btn phone__btn--power" aria-hidden="true"></span>
+                <span class="phone__btn phone__btn--volUp" aria-hidden="true"></span>
+                <span class="phone__btn phone__btn--volDown" aria-hidden="true"></span>
+
+                <div class="phone__screen">
+                  <div class="app">
+
+                    <!-- Barra de estado -->
+                    <div class="app__statusbar" aria-hidden="true">
+                      <span class="app__time">9:41</span>
+                      <span class="app__status-icons">
+                        <svg class="icon"><use href="#i-signal"></use></svg>
+                        <svg class="icon"><use href="#i-wifi"></use></svg>
+                        <svg class="icon"><use href="#i-battery"></use></svg>
+                      </span>
+                    </div>
+
+                    <div class="app__body">
+
+                      <!-- ========== PANTALLA: INICIO ========== -->
+                      <section class="app-screen is-active" id="screen-home" role="tabpanel" aria-labelledby="tab-home">
+                        <header class="app-header">
+                          <div>
+                            <p class="app-header__hello">Hola, Ana</p>
+                            <p class="app-header__sub">Madrid · Plan gratuito</p>
+                          </div>
+                          <span class="app-avatar">AM</span>
+                        </header>
+
+                        <div class="app-search">
+                          <svg class="icon" aria-hidden="true"><use href="#i-search"></use></svg>
+                          <span>Buscar cuidador o competencia</span>
+                        </div>
+
+                        <article class="app-card app-card--row">
+                          <span class="app-avatar app-avatar--lg app-avatar--b">C</span>
+                          <div class="app-card__body">
+                            <p class="app-card__title">Carmen, 82 años</p>
+                            <p class="app-card__meta">Movilidad reducida · Diabetes</p>
+                            <div class="app-chips">
+                              <span class="app-chip">Memoria</span>
+                              <span class="app-chip app-chip--ghost">2 tareas hoy</span>
+                            </div>
+                          </div>
+                          <span class="app-card__link">Editar</span>
+                        </article>
+
+                        <div class="app-section-head">
+                          <h4>Coincidencias para Carmen</h4>
+                          <span class="app-link">Ver todas</span>
+                        </div>
+
+                        <ul class="app-matches">
+                          <li class="app-match">
+                            <span class="app-avatar">LR</span>
+                            <div class="app-match__info">
+                              <p class="app-match__name">Laura R. <svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg></p>
+                              <p class="app-match__role">Cuidadora geriátrica · a 3,2 km</p>
+                              <div class="bar"><div class="bar__fill" style="width:94%"></div></div>
+                            </div>
+                            <span class="app-match__score">94%</span>
+                          </li>
+                          <li class="app-match">
+                            <span class="app-avatar app-avatar--c">MS</span>
+                            <div class="app-match__info">
+                              <p class="app-match__name">Marta S. <svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg></p>
+                              <p class="app-match__role">Auxiliar de enfermería · a 5,1 km</p>
+                              <div class="bar"><div class="bar__fill" style="width:91%"></div></div>
+                            </div>
+                            <span class="app-match__score">91%</span>
+                          </li>
+                          <li class="app-match">
+                            <span class="app-avatar app-avatar--d">CD</span>
+                            <div class="app-match__info">
+                              <p class="app-match__name">Carlos D.</p>
+                              <p class="app-match__role">Atención domiciliaria · a 2,4 km</p>
+                              <div class="bar"><div class="bar__fill" style="width:88%"></div></div>
+                            </div>
+                            <span class="app-match__score">88%</span>
+                          </li>
+                        </ul>
+
+                        <article class="app-card app-card--row">
+                          <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-clock"></use></svg></span>
+                          <div class="app-card__body">
+                            <p class="app-card__title">Medicación · 09:00</p>
+                            <p class="app-card__meta">Laura R. · pendiente hoy</p>
+                          </div>
+                          <span class="app-card__link">Ver</span>
+                        </article>
+                      </section>
+
+                      <!-- ========== PANTALLA: BÚSQUEDA ========== -->
+                      <section class="app-screen" id="screen-search" role="tabpanel" aria-labelledby="tab-search">
+                        <header class="app-header">
+                          <div>
+                            <p class="app-header__hello">Buscar</p>
+                            <p class="app-header__sub">Cuidadores cerca de Madrid</p>
+                          </div>
+                          <span class="app-avatar">AM</span>
+                        </header>
+
+                        <div class="app-search app-search--active">
+                          <svg class="icon" aria-hidden="true"><use href="#i-search"></use></svg>
+                          <span>Cuidadora geriátrica</span>
+                        </div>
+
+                        <div class="app-filters">
+                          <span class="app-filter is-active"><svg class="icon" aria-hidden="true"><use href="#i-map-pin"></use></svg>Madrid · 10 km</span>
+                          <span class="app-filter"><svg class="icon" aria-hidden="true"><use href="#i-clock"></use></svg>Disponibilidad</span>
+                          <span class="app-filter"><svg class="icon" aria-hidden="true"><use href="#i-shield-check"></use></svg>Verificados</span>
+                          <span class="app-filter"><svg class="icon" aria-hidden="true"><use href="#i-star"></use></svg>+4,5</span>
+                        </div>
+
+                        <p class="app-count">128 cuidadores coinciden</p>
+
+                        <ul class="app-results">
+                          <li class="app-result">
+                            <span class="app-avatar">LR</span>
+                            <div class="app-result__info">
+                              <p class="app-result__name">Laura Rodríguez <svg class="icon" aria-hidden="true"><use href="#i-shield-check"></use></svg></p>
+                              <p class="app-result__meta">Cuidadora geriátrica · 6 años</p>
+                              <p class="app-result__meta">
+                                <span class="app-result__rating"><svg class="icon" aria-hidden="true"><use href="#i-star"></use></svg>4,9 (27)</span>
+                                · a 3,2 km · 12 €/h
+                              </p>
+                            </div>
+                            <span class="app-result__score">94%</span>
+                          </li>
+                          <li class="app-result">
+                            <span class="app-avatar app-avatar--c">MS</span>
+                            <div class="app-result__info">
+                              <p class="app-result__name">Marta Sanz <svg class="icon" aria-hidden="true"><use href="#i-shield-check"></use></svg></p>
+                              <p class="app-result__meta">Auxiliar de enfermería · 4 años</p>
+                              <p class="app-result__meta">
+                                <span class="app-result__rating"><svg class="icon" aria-hidden="true"><use href="#i-star"></use></svg>4,8 (19)</span>
+                                · a 5,1 km · 11 €/h
+                              </p>
+                            </div>
+                            <span class="app-result__score">91%</span>
+                          </li>
+                          <li class="app-result">
+                            <span class="app-avatar app-avatar--d">CD</span>
+                            <div class="app-result__info">
+                              <p class="app-result__name">Carlos Díaz</p>
+                              <p class="app-result__meta">Atención domiciliaria · 3 años</p>
+                              <p class="app-result__meta">
+                                <span class="app-result__rating"><svg class="icon" aria-hidden="true"><use href="#i-star"></use></svg>4,7 (12)</span>
+                                · a 2,4 km · 10 €/h
+                              </p>
+                            </div>
+                            <span class="app-result__score">88%</span>
+                          </li>
+                        </ul>
+                      </section>
+
+                      <!-- ========== PANTALLA: RUTINA ========== -->
+                      <section class="app-screen" id="screen-routine" role="tabpanel" aria-labelledby="tab-routine">
+                        <header class="app-header">
+                          <div>
+                            <p class="app-header__hello">Rutina</p>
+                            <p class="app-header__sub" id="app-routine-sub">Carmen · 2 de 6 tareas hoy</p>
+                          </div>
+                          <span class="app-avatar">AM</span>
+                        </header>
+
+                        <div class="app-days" aria-hidden="true">
+                          <span class="app-day"><span>L</span><strong>12</strong></span>
+                          <span class="app-day is-active"><span>M</span><strong>13</strong></span>
+                          <span class="app-day"><span>X</span><strong>14</strong></span>
+                          <span class="app-day"><span>J</span><strong>15</strong></span>
+                          <span class="app-day"><span>V</span><strong>16</strong></span>
+                          <span class="app-day"><span>S</span><strong>17</strong></span>
+                          <span class="app-day"><span>D</span><strong>18</strong></span>
+                        </div>
+
+                        <div class="app-progress">
+                          <div class="app-progress__head">
+                            <span>Progreso del día</span>
+                            <span id="app-progress-label">2 / 6</span>
+                          </div>
+                          <div class="bar"><div class="bar__fill" id="app-progress-bar" style="width:33%"></div></div>
+                        </div>
+
+                        <ul class="app-tasks" id="app-tasks">
+                          <li>
+                            <button class="app-task is-done" type="button">
+                              <span class="app-task__check"><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg></span>
+                              <span>
+                                <span class="app-task__name">Medicación</span>
+                                <span class="app-task__time">09:00 · Laura R.</span>
+                              </span>
+                            </button>
+                          </li>
+                          <li>
+                            <button class="app-task is-done" type="button">
+                              <span class="app-task__check"><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg></span>
+                              <span>
+                                <span class="app-task__name">Ejercicios de movilidad</span>
+                                <span class="app-task__time">10:30 · Laura R.</span>
+                              </span>
+                            </button>
+                          </li>
+                          <li>
+                            <button class="app-task" type="button">
+                              <span class="app-task__check"><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg></span>
+                              <span>
+                                <span class="app-task__name">Comida</span>
+                                <span class="app-task__time">13:00 · Carlos D.</span>
+                              </span>
+                            </button>
+                          </li>
+                          <li>
+                            <button class="app-task" type="button">
+                              <span class="app-task__check"><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg></span>
+                              <span>
+                                <span class="app-task__name">Paseo</span>
+                                <span class="app-task__time">17:00 · Laura R.</span>
+                              </span>
+                            </button>
+                          </li>
+                          <li>
+                            <button class="app-task" type="button">
+                              <span class="app-task__check"><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg></span>
+                              <span>
+                                <span class="app-task__name">Higiene y descanso</span>
+                                <span class="app-task__time">21:00 · Carlos D.</span>
+                              </span>
+                            </button>
+                          </li>
+                          <li class="app-task-li">
+                            <button class="app-task" type="button">
+                              <span class="app-task__check"><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg></span>
+                              <span>
+                                <span class="app-task__name">Poner la lavada</span>
+                                <span class="app-task__time">18:30 · <span class="app-task__badge">solo hoy</span></span>
+                              </span>
+                            </button>
+                            <button class="app-task__del" type="button" aria-label="Quitar Poner la lavada de la rutina">✕</button>
+                          </li>
+                        </ul>
+                        <button class="app-addtask" type="button" id="app-add-task">
+                          <span aria-hidden="true">＋</span> Añadir a la rutina
+                        </button>
+                      </section>
+
+                      <!-- ========== PANTALLA: MI CUIDADOR ========== -->
+                      <section class="app-screen" id="screen-profile" role="tabpanel" aria-labelledby="tab-profile">
+                        <header class="app-header">
+                          <div>
+                            <p class="app-header__hello">Mi cuidador</p>
+                            <p class="app-header__sub">Laura R. · Carmen</p>
+                          </div>
+                          <span class="app-avatar">AM</span>
+                        </header>
+
+                        <div class="app-profile">
+                          <span class="app-avatar app-avatar--xl">LR</span>
+                          <p class="app-profile__name">Laura R.</p>
+                          <p class="app-profile__role">
+                            Cuidadora geriátrica
+                            <svg class="icon" aria-hidden="true"><use href="#i-shield-check"></use></svg>
+                            Verificada
+                          </p>
+
+                          <div class="app-stats">
+                            <div><strong>4,9</strong><span>valoración</span></div>
+                            <div><strong>6 años</strong><span>experiencia</span></div>
+                            <div><strong>132</strong><span>servicios</span></div>
+                          </div>
+
+                          <p class="app-profile__label">Competencias</p>
+                          <div class="app-chips">
+                            <span class="app-chip">Movilidad reducida</span>
+                            <span class="app-chip">Alzheimer</span>
+                            <span class="app-chip">Diabetes</span>
+                            <span class="app-chip">Higiene postural</span>
+                            <span class="app-chip app-chip--ghost">Primeros auxilios</span>
+                          </div>
+                        </div>
+
+                        <div class="app-section-head"><h4>Vuestros acuerdos</h4></div>
+                        <article class="app-card">
+                          <div class="app-kv">
+                            <div class="app-kv__row"><span class="app-kv__key">Horario</span><span class="app-kv__val">Lun–Vie · 09:00–13:00</span></div>
+                            <div class="app-kv__row"><span class="app-kv__key">Tarifa</span><span class="app-kv__val">14 €/h</span></div>
+                          </div>
+                          <p class="app-card__meta">“La medicación queda preparada en la mesilla. Avisa si Carmen no termina la comida.”</p>
+                        </article>
+
+                        <div class="app-section-head"><h4>Qué puede ver y hacer</h4></div>
+                        <article class="app-card">
+                          <button class="app-switch-row" type="button" role="switch" aria-checked="false">
+                            <span>
+                              <span class="app-switch-row__title">Ver datos clínicos</span>
+                              <span class="app-switch-row__sub">Por defecto ocultos</span>
+                            </span>
+                            <span class="app-switch" aria-hidden="true"><span class="app-switch__knob"></span></span>
+                          </button>
+                          <button class="app-switch-row" type="button" role="switch" aria-checked="true">
+                            <span>
+                              <span class="app-switch-row__title">Editar la rutina</span>
+                              <span class="app-switch-row__sub">Añadir o ajustar tareas del día</span>
+                            </span>
+                            <span class="app-switch" aria-hidden="true"><span class="app-switch__knob"></span></span>
+                          </button>
+                          <button class="app-switch-row" type="button" role="switch" aria-checked="true">
+                            <span>
+                              <span class="app-switch-row__title">Ver informes</span>
+                              <span class="app-switch-row__sub">Adherencia e incidencias</span>
+                            </span>
+                            <span class="app-switch" aria-hidden="true"><span class="app-switch__knob"></span></span>
+                          </button>
+                          <button class="app-switch-row" type="button" role="switch" aria-checked="true">
+                            <span>
+                              <span class="app-switch-row__title">Registrar incidencias</span>
+                              <span class="app-switch-row__sub">Apuntar y cerrar lo ocurrido en el turno</span>
+                            </span>
+                            <span class="app-switch" aria-hidden="true"><span class="app-switch__knob"></span></span>
+                          </button>
+                          <button class="app-switch-row" type="button" role="switch" aria-checked="true">
+                            <span>
+                              <span class="app-switch-row__title">Avisarme al completar tareas</span>
+                              <span class="app-switch-row__sub">Notificación al marcar tareas como hechas</span>
+                            </span>
+                            <span class="app-switch" aria-hidden="true"><span class="app-switch__knob"></span></span>
+                          </button>
+                        </article>
+                      </section>
+                    </div>
+
+                    <!-- Barra de pestañas -->
+                    <nav class="app-tabbar" role="tablist" aria-label="Pantallas de la demo">
+                      <button class="app-tab is-active" type="button" role="tab" id="tab-home" aria-selected="true" aria-controls="screen-home" data-screen="home">
+                        <svg class="icon" aria-hidden="true"><use href="#i-home"></use></svg>
+                        Inicio
+                      </button>
+                      <button class="app-tab" type="button" role="tab" id="tab-search" aria-selected="false" aria-controls="screen-search" data-screen="search" tabindex="-1">
+                        <svg class="icon" aria-hidden="true"><use href="#i-search"></use></svg>
+                        Buscar
+                      </button>
+                      <button class="app-tab" type="button" role="tab" id="tab-routine" aria-selected="false" aria-controls="screen-routine" data-screen="routine" tabindex="-1">
+                        <svg class="icon" aria-hidden="true"><use href="#i-calendar"></use></svg>
+                        Rutina
+                      </button>
+                      <button class="app-tab" type="button" role="tab" id="tab-profile" aria-selected="false" aria-controls="screen-profile" data-screen="profile" tabindex="-1">
+                        <svg class="icon" aria-hidden="true"><use href="#i-caregiver"></use></svg>
+                        Mi cuidador
+                      </button>
+                    </nav>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="demo__chip">
+              <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-bell"></use></svg></span>
+              <p>Laura R. ha confirmado el turno de mañana<span>hace 5 min</span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         RECORRIDO FAMILIAR · Pilar 1 · demo interactiva del itinerario
+         ============================================================ -->
+    <section class="section journey" id="recorrido">
+      <div class="container">
+        <header class="section-head reveal">
+          <span class="eyebrow eyebrow--accent">Pilar 1 · La familia</span>
+          <h2>Del registro familiar al seguimiento continuado</h2>
+          <p class="lead">
+            Esta demo reproduce el recorrido operativo del manual: ocho pasos que van desde la
+            cuenta familiar hasta el historial de datos que da continuidad al cuidado. No todos
+            los pasos son obligatorios para cada familia; navega por ellos para ver cómo se
+            reflejan en el producto.
+          </p>
+        </header>
+
+        <div class="journey__layout">
+          <!-- Navegación de pasos -->
+          <ol class="journey__steps reveal" role="tablist" aria-label="Pasos del recorrido de la familia">
+            <li class="journey__item">
+              <button class="journey__step is-active" type="button" role="tab" id="jstep-1" aria-selected="true" aria-controls="jpanel-1" tabindex="0">
+                <span class="journey__num">01</span>
+                <span class="journey__step-text">
+                  <span class="journey__step-title">Cuenta familiar</span>
+                  <span class="journey__step-sub">Registro, acceso y suscripción</span>
+                </span>
+              </button>
+            </li>
+            <li class="journey__item">
+              <button class="journey__step" type="button" role="tab" id="jstep-2" aria-selected="false" aria-controls="jpanel-2" tabindex="-1">
+                <span class="journey__num">02</span>
+                <span class="journey__step-text">
+                  <span class="journey__step-title">Perfil de cuidado</span>
+                  <span class="journey__step-sub">Necesidades, hábitos y preferencias</span>
+                </span>
+              </button>
+            </li>
+            <li class="journey__item">
+              <button class="journey__step" type="button" role="tab" id="jstep-3" aria-selected="false" aria-controls="jpanel-3" tabindex="-1">
+                <span class="journey__num">03</span>
+                <span class="journey__step-text">
+                  <span class="journey__step-title">Publicación y búsqueda</span>
+                  <span class="journey__step-sub">Oferta pública y candidaturas</span>
+                </span>
+              </button>
+            </li>
+            <li class="journey__item">
+              <button class="journey__step" type="button" role="tab" id="jstep-4" aria-selected="false" aria-controls="jpanel-4" tabindex="-1">
+                <span class="journey__num">04</span>
+                <span class="journey__step-text">
+                  <span class="journey__step-title">Selección del cuidador</span>
+                  <span class="journey__step-sub">Comparar y decidir con información</span>
+                </span>
+              </button>
+            </li>
+            <li class="journey__item">
+              <button class="journey__step" type="button" role="tab" id="jstep-5" aria-selected="false" aria-controls="jpanel-5" tabindex="-1">
+                <span class="journey__num">05</span>
+                <span class="journey__step-text">
+                  <span class="journey__step-title">Servicios complementarios</span>
+                  <span class="journey__step-sub">Gestoría, especialistas y formación</span>
+                </span>
+              </button>
+            </li>
+            <li class="journey__item">
+              <button class="journey__step" type="button" role="tab" id="jstep-6" aria-selected="false" aria-controls="jpanel-6" tabindex="-1">
+                <span class="journey__num">06</span>
+                <span class="journey__step-text">
+                  <span class="journey__step-title">Rutinas y seguimiento</span>
+                  <span class="journey__step-sub">Diarias, puntuales e incidencias</span>
+                </span>
+              </button>
+            </li>
+            <li class="journey__item">
+              <button class="journey__step" type="button" role="tab" id="jstep-7" aria-selected="false" aria-controls="jpanel-7" tabindex="-1">
+                <span class="journey__num">07</span>
+                <span class="journey__step-text">
+                  <span class="journey__step-title">Información e informes</span>
+                  <span class="journey__step-sub">Historial organizado y valoración</span>
+                </span>
+              </button>
+            </li>
+            <li class="journey__item">
+              <button class="journey__step" type="button" role="tab" id="jstep-8" aria-selected="false" aria-controls="jpanel-8" tabindex="-1">
+                <span class="journey__num">08</span>
+                <span class="journey__step-text">
+                  <span class="journey__step-title">Datos e historial</span>
+                  <span class="journey__step-sub">Hábitos, alimentación y mediciones</span>
+                </span>
+              </button>
+            </li>
+          </ol>
+
+          <!-- Panel de contenido + teléfono -->
+          <div class="journey__main">
+            <div class="journey__panels">
+              <article class="journey-panel is-active" id="jpanel-1" role="tabpanel" aria-labelledby="jstep-1" tabindex="0">
+                <p class="journey-panel__kicker">Paso 01 · Cuenta familiar</p>
+                <h3 class="journey-panel__title">Registro, preferencias, acceso y suscripción.</h3>
+                <p class="journey-panel__text">
+                  La familia crea su cuenta y configura un espacio de gestión único desde el que
+                  organizar todos los cuidados.
+                </p>
+                <ul class="journey-panel__list">
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Registro e inicio de sesión seguros.</span></li>
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Datos de contacto y preferencias.</span></li>
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Consulta del plan o modalidad de acceso.</span></li>
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Varios perfiles de cuidado, según el plan.</span></li>
+                </ul>
+                <p class="journey-panel__result">
+                  <svg class="icon icon--sm" aria-hidden="true"><use href="#i-sparkles"></use></svg>
+                  <span><strong>Resultado esperado:</strong> una cuenta familiar activa, preparada para crear uno o varios perfiles.</span>
+                </p>
+              </article>
+
+              <article class="journey-panel" id="jpanel-2" role="tabpanel" aria-labelledby="jstep-2" tabindex="0" hidden>
+                <p class="journey-panel__kicker">Paso 02 · Perfil de cuidado</p>
+                <h3 class="journey-panel__title">Necesidades, horarios, hábitos, tareas y preferencias.</h3>
+                <p class="journey-panel__text">
+                  La familia describe de forma estructurada a la persona atendida y el apoyo que
+                  necesita. Esta ficha es el eje operativo de toda la experiencia.
+                </p>
+                <ul class="journey-panel__list">
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Necesidades y tipo de atención requerida.</span></li>
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Ubicación, horarios y disponibilidad.</span></li>
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Movilidad, acompañamiento y actividades cotidianas.</span></li>
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Alimentación, hábitos, preferencias y rutinas.</span></li>
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Competencias necesarias en el cuidador.</span></li>
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Campos sensibles separados y controles claros de visibilidad.</span></li>
+                </ul>
+                <p class="journey-panel__result">
+                  <svg class="icon icon--sm" aria-hidden="true"><use href="#i-sparkles"></use></svg>
+                  <span><strong>Resultado esperado:</strong> una ficha editable que sirve para publicar la necesidad, organizar tareas y mantener el historial.</span>
+                </p>
+              </article>
+
+              <article class="journey-panel" id="jpanel-3" role="tabpanel" aria-labelledby="jstep-3" tabindex="0" hidden>
+                <p class="journey-panel__kicker">Paso 03 · Publicación y búsqueda</p>
+                <h3 class="journey-panel__title">Publicar la necesidad y recibir candidaturas.</h3>
+                <p class="journey-panel__text">
+                  El perfil genera una oferta de cuidado con la información necesaria para que los
+                  profesionales valoren si encajan, sin exponer datos clínicos identificables.
+                </p>
+                <ul class="journey-panel__list">
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>La familia revisa qué información se hace pública.</span></li>
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Los cuidadores descubren la oportunidad y presentan candidatura.</span></li>
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Notificaciones y consulta del estado de cada candidatura.</span></li>
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Sin información clínica identificable en la oferta pública.</span></li>
+                </ul>
+                <p class="journey-panel__result">
+                  <svg class="icon icon--sm" aria-hidden="true"><use href="#i-sparkles"></use></svg>
+                  <span><strong>Resultado esperado:</strong> una oferta publicada y un flujo claro de candidaturas.</span>
+                </p>
+              </article>
+
+              <article class="journey-panel" id="jpanel-4" role="tabpanel" aria-labelledby="jstep-4" tabindex="0" hidden>
+                <p class="journey-panel__kicker">Paso 04 · Selección del cuidador</p>
+                <h3 class="journey-panel__title">Comparar perfiles, disponibilidad, competencias y afinidad.</h3>
+                <p class="journey-panel__text">
+                  La familia revisa candidatos y toma una decisión informada, con criterios de
+                  compatibilidad explicables y trazables.
+                </p>
+                <ul class="journey-panel__list">
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Experiencia, competencias y disponibilidad.</span></li>
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Ubicación y preferencias compatibles.</span></li>
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Referencias y verificaciones realizadas, indicando su alcance.</span></li>
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Condiciones económicas cuando estén disponibles.</span></li>
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Criterios explicables, sin porcentajes ficticios como resultados reales.</span></li>
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Tras decidir, la familia fija en "Mi cuidador" los acuerdos y permisos: horario, tarifa y acceso a datos clínicos.</span></li>
+                </ul>
+                <p class="journey-panel__result">
+                  <svg class="icon icon--sm" aria-hidden="true"><use href="#i-sparkles"></use></svg>
+                  <span><strong>Resultado esperado:</strong> un proceso de selección comprensible, trazable y centrado en la decisión familiar.</span>
+                </p>
+              </article>
+
+              <article class="journey-panel" id="jpanel-5" role="tabpanel" aria-labelledby="jstep-5" tabindex="0" hidden>
+                <p class="journey-panel__kicker">Paso 05 · Servicios complementarios</p>
+                <h3 class="journey-panel__title">Gestoría laboral, especialistas y profesionales autorizados.</h3>
+                <p class="journey-panel__text">
+                  La familia incorpora proveedores solo cuando los necesita, con responsabilidades
+                  y condiciones definidas para cada uno.
+                </p>
+                <ul class="journey-panel__list">
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Gestorías laborales: contratos, nóminas y obligaciones del empleo en el hogar.</span></li>
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Especialistas: fisioterapia, movilidad, rehabilitación u otros apoyos.</span></li>
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Profesionales sanitarios cuando corresponda.</span></li>
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Formación y otros servicios relacionados con el cuidado.</span></li>
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Responsabilidades, condiciones, permisos y forma de contratación definidos.</span></li>
+                </ul>
+                <p class="journey-panel__result">
+                  <svg class="icon icon--sm" aria-hidden="true"><use href="#i-sparkles"></use></svg>
+                  <span><strong>Resultado esperado:</strong> un catálogo modular con servicios opcionales y accesos diferenciados.</span>
+                </p>
+              </article>
+
+              <article class="journey-panel" id="jpanel-6" role="tabpanel" aria-labelledby="jstep-6" tabindex="0" hidden>
+                <p class="journey-panel__kicker">Paso 06 · Rutinas y seguimiento</p>
+                <h3 class="journey-panel__title">Tareas diarias, actividad realizada e incidencias.</h3>
+                <p class="journey-panel__text">
+                  La familia define rutinas y tareas recurrentes o puntuales; el cuidador registra
+                  la actividad realizada. Las tareas son configurables y adaptables a cada persona.
+                </p>
+                <ul class="journey-panel__list">
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Higiene y actividades cotidianas.</span></li>
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Preparación de comidas y seguimiento de hábitos alimentarios.</span></li>
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Paseos, ejercicios y movilidad.</span></li>
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Acompañamiento y estimulación.</span></li>
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>La familia añade tareas al checklist desde la app: a diario o solo para hoy, con su hora.</span></li>
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Registro de tareas realizadas, pendientes e incidencias.</span></li>
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Consulta familiar del seguimiento y valoración del servicio.</span></li>
+                </ul>
+                <p class="journey-panel__result">
+                  <svg class="icon icon--sm" aria-hidden="true"><use href="#i-sparkles"></use></svg>
+                  <span><strong>Resultado esperado:</strong> un checklist diario vinculado al perfil de cuidado, con fecha, responsable y estado de cada tarea.</span>
+                </p>
+              </article>
+
+              <article class="journey-panel" id="jpanel-7" role="tabpanel" aria-labelledby="jstep-7" tabindex="0" hidden>
+                <p class="journey-panel__kicker">Paso 07 · Información e informes</p>
+                <h3 class="journey-panel__title">Historial organizado y datos útiles para la continuidad del cuidado.</h3>
+                <p class="journey-panel__text">
+                  La información generada durante la atención se consulta de forma ordenada para
+                  apoyar las decisiones de la familia.
+                </p>
+                <ul class="journey-panel__list">
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Historial organizado por fecha, responsable y estado.</span></li>
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Adherencia a rutinas y tareas completadas.</span></li>
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Incidencias registradas y su resolución.</span></li>
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Valoración del servicio por la familia.</span></li>
+                </ul>
+                <p class="journey-panel__result">
+                  <svg class="icon icon--sm" aria-hidden="true"><use href="#i-sparkles"></use></svg>
+                  <span><strong>Resultado esperado:</strong> informes claros que sostienen la continuidad de las decisiones de cuidado.</span>
+                </p>
+              </article>
+
+              <article class="journey-panel" id="jpanel-8" role="tabpanel" aria-labelledby="jstep-8" tabindex="0" hidden>
+                <p class="journey-panel__kicker">Paso 08 · Datos e historial</p>
+                <h3 class="journey-panel__title">Hábitos, alimentación, movilidad y mediciones cuando proceda.</h3>
+                <p class="journey-panel__text">
+                  El registro continuado de datos aporta valor a largo plazo: permite detectar
+                  cambios, compartir información con profesionales y cuidar con contexto.
+                </p>
+                <ul class="journey-panel__list">
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Hábitos y rutinas registradas en el tiempo.</span></li>
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Alimentación e hidratación.</span></li>
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Movilidad y actividad.</span></li>
+                  <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span>Mediciones cuando proceda.</span></li>
+                </ul>
+                <p class="journey-panel__result">
+                  <svg class="icon icon--sm" aria-hidden="true"><use href="#i-sparkles"></use></svg>
+                  <span><strong>Resultado esperado:</strong> un historial continuado que aporta continuidad y valor a largo plazo.</span>
+                </p>
+              </article>
+            </div>
+
+            <!-- Demo en el teléfono -->
+            <div class="journey__stage">
+              <span class="journey__glow" aria-hidden="true"></span>
+
+              <div class="phone">
+                <div class="phone__frame">
+                  <span class="phone__island" aria-hidden="true"></span>
+                  <span class="phone__btn phone__btn--power" aria-hidden="true"></span>
+                  <span class="phone__btn phone__btn--volUp" aria-hidden="true"></span>
+                  <span class="phone__btn phone__btn--volDown" aria-hidden="true"></span>
+
+                  <div class="phone__screen">
+                    <div class="app">
+                      <div class="app__statusbar" aria-hidden="true">
+                        <span class="app__time">9:41</span>
+                        <span class="app__status-icons">
+                          <svg class="icon"><use href="#i-signal"></use></svg>
+                          <svg class="icon"><use href="#i-wifi"></use></svg>
+                          <svg class="icon"><use href="#i-battery"></use></svg>
+                        </span>
+                      </div>
+
+                      <div class="app__body">
+
+                        <!-- ========== PASO 01 · CUENTA FAMILIAR ========== -->
+                        <section class="app-screen app-screen--j is-active" id="screen-j-1">
+                          <header class="app-header">
+                            <div>
+                              <p class="app-header__hello">Hola, Ana</p>
+                              <p class="app-header__sub">Madrid · Plan gratuito</p>
+                            </div>
+                            <span class="app-avatar">AM</span>
+                          </header>
+
+                          <article class="app-card">
+                            <p class="app-card__title">Crea tu cuenta familiar</p>
+                            <div class="app-field">
+                              <p class="app-field__label">Nombre</p>
+                              <p class="app-field__input">Ana Martínez</p>
+                            </div>
+                            <div class="app-field">
+                              <p class="app-field__label">Correo electrónico</p>
+                              <p class="app-field__input">ana.martinez@email.com</p>
+                            </div>
+                            <div class="app-actions">
+                              <button class="app-btn app-btn--primary" type="button">Registrarme</button>
+                            </div>
+                          </article>
+
+                          <article class="app-card app-card--row">
+                            <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-layers"></use></svg></span>
+                            <div class="app-card__body">
+                              <p class="app-card__title">Plan gratuito</p>
+                              <p class="app-card__meta">Acceso inicial · 1 perfil de cuidado</p>
+                            </div>
+                            <span class="app-card__link">Ver planes</span>
+                          </article>
+
+                          <div class="app-section-head">
+                            <h4>Mis perfiles de cuidado</h4>
+                            <span class="app-link">+ Nuevo</span>
+                          </div>
+
+                          <article class="app-card app-card--row">
+                            <span class="app-avatar app-avatar--lg app-avatar--b">C</span>
+                            <div class="app-card__body">
+                              <p class="app-card__title">Carmen, 82 años</p>
+                              <p class="app-card__meta">Perfil activo · cuidador asignado</p>
+                            </div>
+                            <span class="app-badge app-badge--ok">Activo</span>
+                          </article>
+                        </section>
+
+                        <!-- ========== PASO 02 · PERFIL DE CUIDADO ========== -->
+                        <section class="app-screen app-screen--j" id="screen-j-2">
+                          <header class="app-header">
+                            <div>
+                              <p class="app-header__hello">Perfil de cuidado</p>
+                              <p class="app-header__sub">Carmen · editable</p>
+                            </div>
+                            <span class="app-card__link">Guardar</span>
+                          </header>
+
+                          <article class="app-card app-card--row">
+                            <span class="app-avatar app-avatar--lg app-avatar--b">C</span>
+                            <div class="app-card__body">
+                              <p class="app-card__title">Carmen, 82 años</p>
+                              <p class="app-card__meta">Atención domiciliaria · Madrid</p>
+                            </div>
+                            <span class="app-card__link">Editar</span>
+                          </article>
+
+                          <div class="app-section-head"><h4>Necesidades y atención</h4></div>
+                          <article class="app-card">
+                            <div class="app-kv">
+                              <div class="app-kv__row"><span class="app-kv__key">Tipo de atención</span><span class="app-kv__val">Domiciliaria continua</span></div>
+                              <div class="app-kv__row"><span class="app-kv__key">Movilidad</span><span class="app-kv__val">Reducida · bastón</span></div>
+                              <div class="app-kv__row"><span class="app-kv__key">Horario</span><span class="app-kv__val">Lun–Vie · 09:00–13:00</span></div>
+                              <div class="app-kv__row"><span class="app-kv__key">Ubicación</span><span class="app-kv__val">Chamberí, Madrid</span></div>
+                            </div>
+                          </article>
+
+                          <div class="app-section-head"><h4>Hábitos y rutinas</h4></div>
+                          <div class="app-chips">
+                            <span class="app-chip">Comida triturada</span>
+                            <span class="app-chip">Siesta 15:30</span>
+                            <span class="app-chip">Paseo diario</span>
+                            <span class="app-chip app-chip--ghost">Medicación 09:00</span>
+                          </div>
+
+                          <div class="app-section-head"><h4>Competencias del cuidador</h4></div>
+                          <div class="app-chips">
+                            <span class="app-chip">Movilidad reducida</span>
+                            <span class="app-chip">Diabetes</span>
+                            <span class="app-chip">Primeros auxilios</span>
+                          </div>
+
+                          <p class="app-note">
+                            <svg class="icon" aria-hidden="true"><use href="#i-lock"></use></svg>
+                            <span>Los campos sensibles están separados y tú decides qué información se muestra en cada contexto.</span>
+                          </p>
+                        </section>
+
+                        <!-- ========== PASO 03 · PUBLICACIÓN Y BÚSQUEDA ========== -->
+                        <section class="app-screen app-screen--j" id="screen-j-3">
+                          <header class="app-header">
+                            <div>
+                              <p class="app-header__hello">Publicación</p>
+                              <p class="app-header__sub">Oferta de cuidado</p>
+                            </div>
+                            <span class="app-avatar">AM</span>
+                          </header>
+
+                          <article class="app-card app-card--row">
+                            <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-briefcase"></use></svg></span>
+                            <div class="app-card__body">
+                              <p class="app-card__title">Oferta publicada</p>
+                              <p class="app-card__meta">Chamberí · Lun–Vie · 09:00–13:00</p>
+                            </div>
+                            <span class="app-card__link">Editar</span>
+                          </article>
+
+                          <div class="app-section-head"><h4>Visibilidad pública</h4></div>
+                          <article class="app-card">
+                            <div class="app-kv">
+                              <div class="app-kv__row"><span class="app-kv__key">Zona y horarios</span><span class="app-badge app-badge--ok">Visible</span></div>
+                              <div class="app-kv__row"><span class="app-kv__key">Necesidades generales</span><span class="app-badge app-badge--ok">Visible</span></div>
+                              <div class="app-kv__row"><span class="app-kv__key">Datos clínicos identificables</span><span class="app-badge app-badge--ghost">Oculto</span></div>
+                            </div>
+                            <p class="app-note">
+                              <svg class="icon" aria-hidden="true"><use href="#i-eye"></use></svg>
+                              <span>La oferta pública nunca muestra información clínica identificable de la persona cuidada.</span>
+                            </p>
+                          </article>
+
+                          <div class="app-section-head">
+                            <h4>Candidaturas · 3</h4>
+                            <span class="app-link">Ver todas</span>
+                          </div>
+
+                          <ul class="app-matches">
+                            <li class="app-match">
+                              <span class="app-avatar">LR</span>
+                              <div class="app-match__info">
+                                <p class="app-match__name">Laura R. <svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg></p>
+                                <p class="app-match__role">Cuidadora geriátrica · hoy</p>
+                              </div>
+                              <span class="app-badge app-badge--new">Nueva</span>
+                            </li>
+                            <li class="app-match">
+                              <span class="app-avatar app-avatar--c">MS</span>
+                              <div class="app-match__info">
+                                <p class="app-match__name">Marta S. <svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg></p>
+                                <p class="app-match__role">Auxiliar de enfermería · ayer</p>
+                              </div>
+                              <span class="app-badge app-badge--ghost">Vista</span>
+                            </li>
+                            <li class="app-match">
+                              <span class="app-avatar app-avatar--d">CD</span>
+                              <div class="app-match__info">
+                                <p class="app-match__name">Carlos D.</p>
+                                <p class="app-match__role">Atención domiciliaria · ayer</p>
+                              </div>
+                              <span class="app-badge app-badge--ghost">Vista</span>
+                            </li>
+                          </ul>
+                        </section>
+
+                        <!-- ========== PASO 04 · SELECCIÓN DEL CUIDADOR ========== -->
+                        <section class="app-screen app-screen--j" id="screen-j-4">
+                          <header class="app-header">
+                            <div>
+                              <p class="app-header__hello">Selección</p>
+                              <p class="app-header__sub">3 candidatos comparados</p>
+                            </div>
+                            <span class="app-avatar">AM</span>
+                          </header>
+
+                          <ul class="app-candidates">
+                            <li class="app-candidate">
+                              <div class="app-candidate__head">
+                                <span class="app-avatar">LR</span>
+                                <div class="app-candidate__who">
+                                  <p class="app-candidate__name">Laura R. <svg class="icon" aria-hidden="true"><use href="#i-shield-check"></use></svg></p>
+                                  <p class="app-candidate__meta">6 años · a 3,2 km · 12 €/h</p>
+                                </div>
+                              </div>
+                              <div class="app-chips">
+                                <span class="app-chip app-chip--ghost">Horario compatible</span>
+                                <span class="app-chip app-chip--ghost">Documentación verificada</span>
+                                <span class="app-chip app-chip--ghost">3 referencias</span>
+                              </div>
+                              <div class="app-actions">
+                                <button class="app-btn app-btn--primary" type="button">Seleccionar</button>
+                                <button class="app-btn app-btn--ghost" type="button">Comparar</button>
+                              </div>
+                            </li>
+
+                            <li class="app-candidate">
+                              <div class="app-candidate__head">
+                                <span class="app-avatar app-avatar--c">MS</span>
+                                <div class="app-candidate__who">
+                                  <p class="app-candidate__name">Marta S. <svg class="icon" aria-hidden="true"><use href="#i-shield-check"></use></svg></p>
+                                  <p class="app-candidate__meta">4 años · a 5,1 km · 11 €/h</p>
+                                </div>
+                              </div>
+                              <div class="app-chips">
+                                <span class="app-chip app-chip--ghost">Tardes libres</span>
+                                <span class="app-chip app-chip--ghost">Documentación verificada</span>
+                                <span class="app-chip app-chip--ghost">2 referencias</span>
+                              </div>
+                              <div class="app-actions">
+                                <button class="app-btn app-btn--ghost" type="button">Seleccionar</button>
+                                <button class="app-btn app-btn--ghost" type="button">Comparar</button>
+                              </div>
+                            </li>
+                          </ul>
+
+                          <p class="app-note">
+                            <svg class="icon" aria-hidden="true"><use href="#i-sparkles"></use></svg>
+                            <span>La afinidad se explica con datos registrados: ubicación, disponibilidad, experiencia y verificaciones. Sin porcentajes ficticios.</span>
+                          </p>
+
+                          <article class="app-card app-card--row">
+                            <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-caregiver"></use></svg></span>
+                            <div class="app-card__body">
+                              <p class="app-card__title">Mi cuidador</p>
+                              <p class="app-card__meta">Acuerdos y permisos tras la selección</p>
+                            </div>
+                            <span class="app-card__link">Configurar</span>
+                          </article>
+                        </section>
+
+                        <!-- ========== PASO 05 · SERVICIOS COMPLEMENTARIOS ========== -->
+                        <section class="app-screen app-screen--j" id="screen-j-5">
+                          <header class="app-header">
+                            <div>
+                              <p class="app-header__hello">Servicios</p>
+                              <p class="app-header__sub">Catálogo modular</p>
+                            </div>
+                            <span class="app-avatar">AM</span>
+                          </header>
+
+                          <div class="app-section-head"><h4>Servicios complementarios</h4></div>
+
+                          <div class="app-service">
+                            <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-building"></use></svg></span>
+                            <div class="app-service__info">
+                              <p class="app-service__name">Gestoría laboral</p>
+                              <p class="app-service__meta">Contratos, nóminas y obligaciones</p>
+                            </div>
+                            <span class="app-badge app-badge--ok">Contratado</span>
+                          </div>
+
+                          <div class="app-service">
+                            <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-activity"></use></svg></span>
+                            <div class="app-service__info">
+                              <p class="app-service__name">Fisioterapia</p>
+                              <p class="app-service__meta">Movilidad y rehabilitación</p>
+                            </div>
+                            <span class="app-card__link">Añadir</span>
+                          </div>
+
+                          <div class="app-service">
+                            <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-award"></use></svg></span>
+                            <div class="app-service__info">
+                              <p class="app-service__name">Formación</p>
+                              <p class="app-service__meta">Competencias del cuidador</p>
+                            </div>
+                            <span class="app-card__link">Añadir</span>
+                          </div>
+
+                          <div class="app-service">
+                            <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-shield-check"></use></svg></span>
+                            <div class="app-service__info">
+                              <p class="app-service__name">Profesional sanitario</p>
+                              <p class="app-service__meta">Cuando corresponda</p>
+                            </div>
+                            <span class="app-card__link">Añadir</span>
+                          </div>
+
+                          <p class="app-note">
+                            <svg class="icon" aria-hidden="true"><use href="#i-clipboard"></use></svg>
+                            <span>Cada servicio define responsabilidades, condiciones, permisos y forma de contratación, con accesos diferenciados.</span>
+                          </p>
+                        </section>
+
+                        <!-- ========== PASO 06 · RUTINAS Y SEGUIMIENTO ========== -->
+                        <section class="app-screen app-screen--j" id="screen-j-6">
+                          <header class="app-header">
+                            <div>
+                              <p class="app-header__hello">Rutina</p>
+                              <p class="app-header__sub">Carmen · tareas de hoy</p>
+                            </div>
+                            <span class="app-avatar">AM</span>
+                          </header>
+
+                          <div class="app-days" aria-hidden="true">
+                            <span class="app-day"><span>L</span><strong>12</strong></span>
+                            <span class="app-day is-active"><span>M</span><strong>13</strong></span>
+                            <span class="app-day"><span>X</span><strong>14</strong></span>
+                            <span class="app-day"><span>J</span><strong>15</strong></span>
+                            <span class="app-day"><span>V</span><strong>16</strong></span>
+                            <span class="app-day"><span>S</span><strong>17</strong></span>
+                            <span class="app-day"><span>D</span><strong>18</strong></span>
+                          </div>
+
+                          <div class="app-progress">
+                            <div class="app-progress__head">
+                              <span>Progreso del día</span>
+                              <span id="j-progress-label">2 / 6</span>
+                            </div>
+                            <div class="bar"><div class="bar__fill" id="j-progress-bar" style="width:33%"></div></div>
+                          </div>
+
+                          <ul class="app-tasks" id="j-tasks">
+                            <li>
+                              <button class="app-task is-done" type="button">
+                                <span class="app-task__check"><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg></span>
+                                <span>
+                                  <span class="app-task__name">Medicación</span>
+                                  <span class="app-task__time">09:00 · Laura R.</span>
+                                </span>
+                              </button>
+                            </li>
+                            <li>
+                              <button class="app-task is-done" type="button">
+                                <span class="app-task__check"><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg></span>
+                                <span>
+                                  <span class="app-task__name">Ejercicios de movilidad</span>
+                                  <span class="app-task__time">10:30 · Laura R.</span>
+                                </span>
+                              </button>
+                            </li>
+                            <li>
+                              <button class="app-task" type="button">
+                                <span class="app-task__check"><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg></span>
+                                <span>
+                                  <span class="app-task__name">Comida</span>
+                                  <span class="app-task__time">13:00 · Laura R.</span>
+                                </span>
+                              </button>
+                            </li>
+                            <li>
+                              <button class="app-task" type="button">
+                                <span class="app-task__check"><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg></span>
+                                <span>
+                                  <span class="app-task__name">Paseo</span>
+                                  <span class="app-task__time">17:00 · Laura R.</span>
+                                </span>
+                              </button>
+                            </li>
+                            <li>
+                              <button class="app-task" type="button">
+                                <span class="app-task__check"><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg></span>
+                                <span>
+                                  <span class="app-task__name">Higiene y descanso</span>
+                                  <span class="app-task__time">21:00 · Carlos D.</span>
+                                </span>
+                              </button>
+                            </li>
+                            <li class="app-task-li">
+                              <button class="app-task" type="button">
+                                <span class="app-task__check"><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg></span>
+                                <span>
+                                  <span class="app-task__name">Poner la lavada</span>
+                                  <span class="app-task__time">18:30 · <span class="app-task__badge">solo hoy</span></span>
+                                </span>
+                              </button>
+                              <button class="app-task__del" type="button" aria-label="Quitar Poner la lavada de la rutina">✕</button>
+                            </li>
+                          </ul>
+                          <button class="app-addtask" type="button" id="j-add-task">
+                            <span aria-hidden="true">＋</span> Añadir a la rutina
+                          </button>
+
+                          <div class="app-section-head"><h4>Incidencias</h4></div>
+                          <article class="app-card app-card--row">
+                            <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-bell"></use></svg></span>
+                            <div class="app-card__body">
+                              <p class="app-card__title">Negativa a comer</p>
+                              <p class="app-card__meta">12:30 · Laura R. · familia avisada</p>
+                            </div>
+                            <span class="app-badge app-badge--new">Abierta</span>
+                          </article>
+                        </section>
+
+                        <!-- ========== PASO 07 · INFORMACIÓN E INFORMES ========== -->
+                        <section class="app-screen app-screen--j" id="screen-j-7">
+                          <header class="app-header">
+                            <div>
+                              <p class="app-header__hello">Informes</p>
+                              <p class="app-header__sub">Semana del 12–18 de octubre</p>
+                            </div>
+                            <span class="app-avatar">AM</span>
+                          </header>
+
+                          <div class="app-stats">
+                            <div><strong>92%</strong><span>tareas cumplidas</span></div>
+                            <div><strong>1</strong><span>incidencia</span></div>
+                            <div><strong>4,8</strong><span>valoración</span></div>
+                          </div>
+
+                          <div class="app-section-head"><h4>Adherencia por rutina</h4></div>
+                          <article class="app-card">
+                            <div class="app-adherence">
+                              <div class="app-adherence__row">
+                                <span class="app-adherence__name">Medicación</span>
+                                <div class="bar"><div class="bar__fill" style="width:100%"></div></div>
+                                <span class="app-adherence__val">7/7</span>
+                              </div>
+                              <div class="app-adherence__row">
+                                <span class="app-adherence__name">Comidas</span>
+                                <div class="bar"><div class="bar__fill" style="width:90%"></div></div>
+                                <span class="app-adherence__val">19/21</span>
+                              </div>
+                              <div class="app-adherence__row">
+                                <span class="app-adherence__name">Paseos</span>
+                                <div class="bar"><div class="bar__fill" style="width:86%"></div></div>
+                                <span class="app-adherence__val">6/7</span>
+                              </div>
+                              <div class="app-adherence__row">
+                                <span class="app-adherence__name">Higiene</span>
+                                <div class="bar"><div class="bar__fill" style="width:100%"></div></div>
+                                <span class="app-adherence__val">7/7</span>
+                              </div>
+                            </div>
+                          </article>
+
+                          <div class="app-section-head"><h4>Incidencias registradas</h4></div>
+                          <article class="app-card">
+                            <p class="app-card__title">16 oct · Negativa a comer</p>
+                            <p class="app-card__meta">Resuelta por Laura R. · seguimiento con fisioterapia</p>
+                          </article>
+
+                          <p class="app-note">
+                            <svg class="icon" aria-hidden="true"><use href="#i-file-text"></use></svg>
+                            <span>Historial organizado por fecha, responsable y estado para decidir con información suficiente.</span>
+                          </p>
+                        </section>
+
+                        <!-- ========== PASO 08 · DATOS E HISTORIAL ========== -->
+                        <section class="app-screen app-screen--j" id="screen-j-8">
+                          <header class="app-header">
+                            <div>
+                              <p class="app-header__hello">Historial</p>
+                              <p class="app-header__sub">Carmen · datos continuados</p>
+                            </div>
+                            <span class="app-avatar">AM</span>
+                          </header>
+
+                          <div class="app-filters" aria-label="Categorías del historial">
+                            <span class="app-filter is-active">Hábitos</span>
+                            <span class="app-filter">Alimentación</span>
+                            <span class="app-filter">Movilidad</span>
+                            <span class="app-filter">Mediciones</span>
+                          </div>
+
+                          <div class="app-section-head"><h4>Sueño · últimos 7 días</h4></div>
+                          <article class="app-card">
+                            <div class="app-chart" aria-hidden="true">
+                              <div class="app-chart__col"><div class="app-chart__bar" style="height:62%"></div><span class="app-chart__day">L</span></div>
+                              <div class="app-chart__col"><div class="app-chart__bar" style="height:70%"></div><span class="app-chart__day">M</span></div>
+                              <div class="app-chart__col"><div class="app-chart__bar" style="height:55%"></div><span class="app-chart__day">X</span></div>
+                              <div class="app-chart__col"><div class="app-chart__bar" style="height:78%"></div><span class="app-chart__day">J</span></div>
+                              <div class="app-chart__col"><div class="app-chart__bar" style="height:66%"></div><span class="app-chart__day">V</span></div>
+                              <div class="app-chart__col"><div class="app-chart__bar" style="height:82%"></div><span class="app-chart__day">S</span></div>
+                              <div class="app-chart__col"><div class="app-chart__bar" style="height:74%"></div><span class="app-chart__day">D</span></div>
+                            </div>
+                            <p class="app-card__meta app-chart__note">Media de 7,1 h · registrado por el cuidador</p>
+                          </article>
+
+                          <div class="app-section-head"><h4>Registros recientes</h4></div>
+
+                          <div class="app-record">
+                            <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-droplet"></use></svg></span>
+                            <div class="app-record__body">
+                              <p class="app-record__title">Alimentación</p>
+                              <p class="app-record__meta">Come el 80% de la ración · 13:00 · Laura R.</p>
+                            </div>
+                          </div>
+                          <div class="app-record">
+                            <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-activity"></use></svg></span>
+                            <div class="app-record__body">
+                              <p class="app-record__title">Movilidad</p>
+                              <p class="app-record__meta">Paseo de 25 min · 17:00 · Laura R.</p>
+                            </div>
+                          </div>
+                          <div class="app-record">
+                            <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-file-text"></use></svg></span>
+                            <div class="app-record__body">
+                              <p class="app-record__title">Medición</p>
+                              <p class="app-record__meta">Peso 64 kg · estable · 12 oct</p>
+                            </div>
+                          </div>
+                        </section>
+                      </div>
+
+                      <!-- Barra de pestañas: visible en todas las páginas del recorrido -->
+                      <nav class="app-tabbar app-tabbar--j" aria-label="Secciones de la app">
+                        <button class="app-tab app-tab--j is-active" type="button" data-paso="0">
+                          <svg class="icon" aria-hidden="true"><use href="#i-home"></use></svg>
+                          Inicio
+                        </button>
+                        <button class="app-tab app-tab--j" type="button" data-paso="2">
+                          <svg class="icon" aria-hidden="true"><use href="#i-search"></use></svg>
+                          Buscar
+                        </button>
+                        <button class="app-tab app-tab--j" type="button" data-paso="5">
+                          <svg class="icon" aria-hidden="true"><use href="#i-calendar"></use></svg>
+                          Rutina
+                        </button>
+                        <button class="app-tab app-tab--j" type="button" data-paso="3">
+                          <svg class="icon" aria-hidden="true"><use href="#i-caregiver"></use></svg>
+                          Mi cuidador
+                        </button>
+                      </nav>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Controles de navegación -->
+            <div class="journey__controls reveal">
+              <button class="journey__ctrl journey__ctrl--prev" id="journey-prev" type="button" disabled>
+                <svg class="icon icon--sm" aria-hidden="true"><use href="#i-arrow-right"></use></svg>
+                Anterior
+              </button>
+              <p class="journey__counter" id="journey-counter">Paso 1 de 8</p>
+              <button class="journey__ctrl journey__ctrl--next" id="journey-next" type="button">
+                Siguiente
+                <svg class="icon icon--sm" aria-hidden="true"><use href="#i-arrow-right"></use></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         USUARIOS
+         ============================================================ -->
+    <section class="section section--alt users" id="usuarios">
+      <div class="slide__content">
+        <div class="slide__inner">
+          <header class="section-head">
+            <span class="eyebrow">Usuarios principales</span>
+            <h2>Un ecosistema construido alrededor del cuidado</h2>
+            <p class="lead">Seis tipos de usuario conviven en la plataforma, cada uno con perfil, permisos y herramientas propias.</p>
+          </header>
+
+          <div class="grid grid--3 users__grid ">
+            <article class="card">
+              <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-home"></use></svg></span>
+              <h3 class="card__title">Familias</h3>
+              <p class="card__text">Personas que necesitan organizar los cuidados de un familiar y buscar al profesional adecuado.</p>
+            </article>
+
+            <article class="card">
+              <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-caregiver"></use></svg></span>
+              <h3 class="card__title">Cuidadores</h3>
+              <p class="card__text">Profesionales de atención domiciliaria que buscan visibilidad y oportunidades laborales.</p>
+            </article>
+
+            <article class="card">
+              <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-briefcase"></use></svg></span>
+              <h3 class="card__title">Gestorías laborales</h3>
+              <p class="card__text">Proveedores de contratación y gestión administrativa del cuidado a domicilio.</p>
+            </article>
+
+            <article class="card">
+              <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-award"></use></svg></span>
+              <h3 class="card__title">Formadores</h3>
+              <p class="card__text">Entidades educativas que desarrollan y acreditan las competencias del sector.</p>
+            </article>
+
+            <article class="card">
+              <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-activity"></use></svg></span>
+              <h3 class="card__title">Profesionales sanitarios</h3>
+              <p class="card__text">Especialistas habilitados para la atención especializada de la persona cuidada.</p>
+            </article>
+
+            <article class="card">
+              <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-building"></use></svg></span>
+              <h3 class="card__title">Empresas colaboradoras</h3>
+              <p class="card__text">Proveedores de servicios complementarios dentro del ecosistema Cuidapp.</p>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         DIFERENCIACIÓN
+         ============================================================ -->
+    <section class="section differentiation" id="diferenciacion">
+      <div class="slide__content">
+        <div class="slide__inner quote">
+          <div>
+            <header class="section-head">
+              <span class="eyebrow">Diferenciación</span>
+              <h2>No se trata solo de encontrar a alguien que cuide</h2>
+            </header>
+
+            <blockquote class="quote__block">
+              <p class="quote__text">
+                «Cuidapp no debe limitarse a encontrar a alguien que cuide. Debe facilitar que la familia
+                encuentre una persona adecuada, pueda elegir con información suficiente y disponga de
+                herramientas para organizar los cuidados de manera continuada.»
+              </p>
+              <cite class="quote__cite">— Principio rector de Cuidapp</cite>
+            </blockquote>
+          </div>
+
+          <ul class="quote__list ">
+            <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span><strong>Acceso más directo</strong> a los perfiles profesionales.</span></li>
+            <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span><strong>Elección y comparación</strong> por parte de la familia.</span></li>
+            <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span><strong>Perfiles construidos</strong> a partir de competencias y experiencia.</span></li>
+            <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span><strong>Compatibilidad explicable</strong> entre necesidades y profesionales.</span></li>
+            <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span><strong>Continuidad</strong> después de la contratación mediante seguimiento y organización.</span></li>
+            <li><svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg><span><strong>Ecosistema</strong> de servicios complementarios.</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         MODELO DE NEGOCIO
+         ============================================================ -->
+    <section class="section section--alt model" id="modelo">
+      <div class="slide__content">
+        <div class="slide__inner">
+          <header class="section-head">
+            <span class="eyebrow">Modelo de negocio</span>
+            <h2>Freemium: empieza gratis, crece cuando lo necesites</h2>
+            <p class="lead">
+              Acceso inicial gratuito y suscripciones para funcionalidades ampliadas. Ingresos adicionales
+              potenciales por formación, servicios administrativos, herramientas profesionales y
+              colaboraciones comerciales.
+            </p>
+          </header>
+
+          <div class="plans ">
+            <article class="plan">
+              <span class="plan__badge">GRATUITO</span>
+              <h3 class="plan__name">Acceso inicial</h3>
+              <p class="plan__text">Registra necesidades, crea tu perfil y empieza a comparar profesionales sin coste.</p>
+              <ul class="checklist">
+                <li>Perfil de familia o cuidador</li>
+                <li>Búsqueda y comparación básica</li>
+                <li>Primeras coincidencias recomendadas</li>
+              </ul>
+            </article>
+
+            <article class="plan plan--premium">
+              <span class="plan__badge">SUSCRIPCIÓN</span>
+              <h3 class="plan__name">Funcionalidades ampliadas</h3>
+              <p class="plan__text">Herramientas avanzadas de organización, seguimiento y visibilidad para quienes necesitan más.</p>
+              <ul class="checklist">
+                <li>Coincidencias avanzadas y visibilidad prioritaria</li>
+                <li>Rutinas, checklists e informes</li>
+                <li>Herramientas profesionales y colaboradores</li>
+              </ul>
+              <p class="plan__note">Los precios, límites y funcionalidades de cada plan se validarán mediante pruebas con usuarios.</p>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         PLATAFORMA · slide con scroll-driven animation
+         ============================================================ -->
+    <section class="section platform" id="plataforma">
+      <div class="slide__content">
+        <div class="slide__inner">
+          <header class="section-head section-head--center">
+            <span class="eyebrow">La plataforma</span>
+            <h2>Diseñada para crecer contigo</h2>
+            <p class="lead">Requisitos conceptuales que guían el desarrollo del producto.</p>
+          </header>
+
+          <ul class="requirements ">
+            <li class="requirement">
+              <span class="requirement__num">01</span>
+              <p class="requirement__text">Perfiles diferenciados para familias y cuidadores.</p>
+            </li>
+            <li class="requirement">
+              <span class="requirement__num">02</span>
+              <p class="requirement__text">Perfil de la persona cuidada con necesidades, preferencias y rutinas.</p>
+            </li>
+            <li class="requirement">
+              <span class="requirement__num">03</span>
+              <p class="requirement__text">Catálogo de etiquetas normalizadas.</p>
+            </li>
+            <li class="requirement">
+              <span class="requirement__num">04</span>
+              <p class="requirement__text">Búsqueda geográfica y filtros de disponibilidad.</p>
+            </li>
+            <li class="requirement">
+              <span class="requirement__num">05</span>
+              <p class="requirement__text">Motor de coincidencias.</p>
+            </li>
+            <li class="requirement">
+              <span class="requirement__num">06</span>
+              <p class="requirement__text">Publicación de ofertas y recepción de candidaturas.</p>
+            </li>
+            <li class="requirement">
+              <span class="requirement__num">07</span>
+              <p class="requirement__text">Sistema de verificación documental y reputación.</p>
+            </li>
+            <li class="requirement">
+              <span class="requirement__num">08</span>
+              <p class="requirement__text">Suscripciones y permisos por nivel.</p>
+            </li>
+            <li class="requirement">
+              <span class="requirement__num">09</span>
+              <p class="requirement__text">Arquitectura preparada para checklists, informes y colaboradores.</p>
+            </li>
+            <li class="requirement requirement--wide">
+              <span class="requirement__num">10</span>
+              <p class="requirement__text"><strong>Privacidad, seguridad, permisos y auditoría desde el diseño.</strong></p>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         APLICACIÓN DE RUTINAS COGNITIVAS · demo interactiva
+         ============================================================ -->
+    <section class="section section--alt cog" id="cognitivas">
+      <div class="container">
+        <header class="section-head reveal">
+          <span class="eyebrow">Rutinas cognitivas</span>
+          <h2>Entrena la memoria, sigue el progreso y comparte los avances</h2>
+          <p class="lead">
+            Doce juegos de estimulación cognitiva agrupados en memoria y atención, lógica y razonamiento,
+            lenguaje y creatividad, y orientación y percepción. Todos son jugables desde aquí, con
+            dificultad ajustable, seguimiento de resultados y modo cuidador.
+          </p>
+        </header>
+
+        <div class="cog__layout">
+          <div class="cog__copy reveal">
+            <ul class="demo__features">
+              <li class="demo__feature reveal" style="--reveal-delay:80ms">
+                <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-brain"></use></svg></span>
+                <div>
+                  <h3>Juegos de memoria</h3>
+                  <p>Emparejamiento visual, memoria auditiva y recuerdo del día anterior.</p>
+                </div>
+              </li>
+              <li class="demo__feature reveal" style="--reveal-delay:160ms">
+                <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-signal"></use></svg></span>
+                <div>
+                  <h3>Seguimiento de progreso</h3>
+                  <p>Puntuación, racha y nivel se registran automáticamente tras cada sesión.</p>
+                </div>
+              </li>
+              <li class="demo__feature reveal" style="--reveal-delay:240ms">
+                <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-bell"></use></svg></span>
+                <div>
+                  <h3>Notificaciones de hábito</h3>
+                  <p>Recordatorios suaves para mantener la rutina cognitiva cada día.</p>
+                </div>
+              </li>
+              <li class="demo__feature reveal" style="--reveal-delay:320ms">
+                <span class="icon-tile"><svg class="icon" aria-hidden="true"><use href="#i-users"></use></svg></span>
+                <div>
+                  <h3>Panel familiar</h3>
+                  <p>La familia consulta avances, rachas y evolución desde su propio panel.</p>
+                </div>
+              </li>
+            </ul>
+
+            <div class="cog-library">
+              <div class="cog-library__head">
+                <h3 class="cog-library__title">Catálogo de juegos</h3>
+                <p class="cog-library__hint">Elige un juego y juégalo en el panel.</p>
+              </div>
+              <div class="cog-library__groups" id="cog-library"></div>
+            </div>
+
+            <p class="demo__note">Demo interactiva · datos de ejemplo · Expo + React Native + TypeScript</p>
+          </div>
+
+          <div class="cog__stage reveal" style="--reveal-delay:120ms">
+            <div class="cog-game" id="cog-game">
+              <header class="cog-game__head">
+                <div class="cog-game__heading">
+                  <p class="cog-game__title" id="cog-game-title">Memory Match Pro</p>
+                  <p class="cog-game__sub" id="cog-status">Encuentra todas las parejas</p>
+                </div>
+                <div class="cog-game__actions">
+                  <label class="cog-field" for="cog-difficulty">
+                    <span class="cog-field__label">Modo cuidador</span>
+                    <select class="cog-select" id="cog-difficulty" aria-label="Dificultad del juego">
+                      <option value="facil">Fácil</option>
+                      <option value="normal" selected>Normal</option>
+                      <option value="dificil">Difícil</option>
+                    </select>
+                  </label>
+                  <button class="cog-voice" id="cog-voice" type="button" aria-pressed="false">
+                    <svg class="icon icon--sm" aria-hidden="true"><use href="#i-volume"></use></svg>
+                    Voz
+                  </button>
+                  <button class="cog-game__reset" type="button" id="cog-reset">Reiniciar</button>
+                </div>
+              </header>
+
+              <p class="cog-game__meta"><strong id="cog-objective">Objetivo</strong><span id="cog-tech"></span></p>
+
+              <div class="cog-stats" id="cog-stats"></div>
+
+              <div class="cog-panel" id="cog-panel"></div>
+
+              <div class="cog-progress">
+                <div class="app-progress__head"><span>Progreso</span><span id="cog-progress-label">0%</span></div>
+                <div class="bar"><div class="bar__fill" id="cog-progress-bar" style="width:0%"></div></div>
+              </div>
+
+              <div class="cog-family">
+                <p class="cog-family__title">Panel familiar · avances de Carmen</p>
+                <ul class="cog-family__list">
+                  <li><span class="app-avatar">AM</span><div><strong>Ana</strong><span id="cog-fam-sessions">Esta semana: 4 sesiones</span></div><span class="cog-family__score" id="cog-fam-hit">+12%</span></li>
+                  <li><span class="app-avatar app-avatar--c">LR</span><div><strong>Laura</strong><span id="cog-fam-streak">Racha: 6 días</span></div><span class="cog-family__score" id="cog-fam-level">Nivel 3</span></li>
+                </ul>
+                <div class="cog-week" id="cog-week" aria-hidden="true"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+"
+    <section class="scope" id="alcance">
+      <div class="slide__content">
+        <div class="slide__inner">
+          <span class="eyebrow">Alcance inicial</span>
+          <h2 class="scope__title">Empezamos por lo esencial</h2>
+          <p class="scope__text">
+            El primer producto se centra en <strong>perfiles, búsqueda, compatibilidad y conexión</strong>.
+            La gestión laboral avanzada, la formación, los informes sanitarios y las integraciones
+            clínicas se desarrollarán progresivamente, después de validar la demanda y los requisitos aplicables.
+          </p>
+          <div class="scope__pills ">
+            <span class="pill">Perfiles</span>
+            <span class="pill">Búsqueda</span>
+            <span class="pill">Compatibilidad</span>
+            <span class="pill">Conexión</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         CRM FAMILIAR · Demo: cuidador envía datos y CRM profesional
+         ============================================================ -->
+    <section class="section section--alt crm" id="crm">
+      <div class="container">
+        <header class="section-head reveal section-head--center">
+          <span class="eyebrow">CRM familiar</span>
+          <h2>El cuidador reporta, la familia ordena</h2>
+          <p class="lead">
+            El cuidador envía los datos del turno desde su app y el CRM familiar queda
+            configurado profesionalmente: pacientes, estado de atención, seguimiento y métricas
+            listas para la familia y los colaboradores autorizados.
+          </p>
+        </header>
+
+        <div class="crm__layout reveal">
+          <!-- Columna izquierda: formulario de envío del cuidador -->
+          <div class="crm__form-card">
+            <div class="crm__form">
+              <h3>Envío de datos del cuidador</h3>
+              <p class="sub">Rellena los datos de la visita. Al enviar, el registro aparece al instante en el panel CRM de la derecha.</p>
+
+              <div class="crm__fields">
+                <div class="crm__field">
+                  <label for="crm-cuidador">Nombre del cuidador</label>
+                  <input id="crm-cuidador" type="text" placeholder="Laura R." required />
+                </div>
+                <div class="crm__field">
+                  <label for="crm-paciente">Nombre del paciente</label>
+                  <input id="crm-paciente" type="text" placeholder="Carmen M." required />
+                </div>
+                <div class="crm__field">
+                  <label for="crm-atencion">Tipo de atención</label>
+                  <select id="crm-atencion" required>
+                    <option value="">Selecciona</option>
+                    <option value="Domiciliaria continua">Domiciliaria continua</option>
+                    <option value="Acompañamiento puntual">Acompañamiento puntual</option>
+                    <option value="Rehabilitación">Rehabilitación / fisioterapia</option>
+                    <option value="Noche">Atención nocturna</option>
+                  </select>
+                </div>
+                <div class="crm__field">
+                  <label for="crm-fecha">Fecha y turno</label>
+                  <input id="crm-fecha" type="datetime-local" required />
+                </div>
+                <div class="crm__field full">
+                  <label for="crm-observaciones">Observaciones clínicas / incidencias</label>
+                  <textarea id="crm-observaciones" placeholder="Ej.: negativa a comer, seguimiento con fisioterapia…"></textarea>
+                </div>
+                <div class="crm__field full">
+                  <label for="crm-urgencia">Nivel de urgencia</label>
+                  <select id="crm-urgencia" required>
+                    <option value="normal">Normal</option>
+                    <option value="media">Media</option>
+                    <option value="alta">Alta</option>
+                  </select>
+                </div>
+              </div>
+
+              <button class="btn btn--primary crm__send" type="button" id="crm-enviar">
+                <svg class="icon" aria-hidden="true"><use href="#i-paper-plane"></use></svg>
+                Enviar al CRM
+              </button>
+            </div>
+          </div>
+
+          <!-- Columna derecha: panel CRM profesional -->
+          <div class="crm__crm-card">
+            <div class="crm__panel">
+              <div class="crm__panel__head">
+                <div>
+                  <h3 class="crm__panel__title">Panel CRM familiar</h3>
+                  <p class="crm__panel__sub" style="font-size:var(--text-xs);color:var(--ink-3);margin-top:0.2rem;">Datos verificados y listos para auditoría</p>
+                </div>
+                <span class="crm__badge"><span class="crm__badge__dot" aria-hidden="true"></span>Activo</span>
+              </div>
+
+              <div class="crm__stats">
+                <div class="crm__stat crm__stat--accent">
+                  <span class="crm__stat__val" id="crm-stat-total">0</span>
+                  <span class="crm__stat__lbl">Registros hoy</span>
+                </div>
+                <div class="crm__stat crm__stat--ok">
+                  <span class="crm__stat__val" id="crm-stat-activos">0</span>
+                  <span class="crm__stat__lbl">Atenciones activas</span>
+                </div>
+                <div class="crm__stat crm__stat--warn">
+                  <span class="crm__stat__val" id="crm-stat-pendientes">0</span>
+                  <span class="crm__stat__lbl">Pendientes de revisión</span>
+                </div>
+              </div>
+
+              <div class="crm__patients" id="crm-pacientes">
+                <div class="crm__empty">
+                  <svg class="icon" aria-hidden="true"><use href="#i-clipboard"></use></svg>
+                  <p>Sin registros todavía. Envía el primer dato desde el formulario.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p class="crm__note">
+          <strong>Configuración profesional:</strong> cada registro queda vinculado al perfil de
+          cuidado, con fecha, responsable y nivel de urgencia. La familia consulta el historial
+          desde su panel y los colaboradores autorizados ven solo lo que les corresponde.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         CTA · cierre estático
+         ============================================================ -->
+    <section class="cta" id="cta">
+      <div class="container cta__inner reveal">
+          <span class="cta__icon"><svg class="icon icon--lg" aria-hidden="true"><use href="#i-heart"></use></svg></span>
+          <h2>Súmate al acceso anticipado</h2>
+          <p class="cta__text">
+            Estamos validando la demanda con familias, cuidadores y colaboradores.
+            Déjanos tu email y te avisaremos cuando la plataforma esté disponible.
+          </p>
+
+          <form class="form" id="cta-form" novalidate>
+            <label class="sr-only" for="email">Correo electrónico</label>
+            <input class="form__input" id="email" name="email" type="email" placeholder="tu@email.com" required autocomplete="email" />
+            <button class="btn btn--primary" type="submit">
+              <svg class="icon icon--sm" aria-hidden="true"><use href="#i-mail"></use></svg>
+              Quiero información
+            </button>
+          </form>
+
+          <p class="form__success" id="form-success" role="status" hidden>
+            <svg class="icon icon--sm" aria-hidden="true"><use href="#i-check"></use></svg>
+            ¡Gracias! Te contactaremos en cuanto lancemos el acceso anticipado.
+          </p>
+
+          <p class="cta__trust">
+            <svg class="icon icon--sm" aria-hidden="true"><use href="#i-shield-check"></use></svg>
+            Privacidad, seguridad y auditoría desde el diseño.
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============================================================
+       FOOTER
+       ============================================================ -->
+  <footer class="site-footer">
+    <div class="container site-footer__grid grid grid--4">
+      <div>
+        <a class="brand" href="#inicio">
+          <span class="brand__mark"><svg class="icon" aria-hidden="true"><use href="#i-heart"></use></svg></span>
+          <span class="brand__name">Cuid<em>app</em></span>
+        </a>
+        <p class="site-footer__text">
+          Plataforma digital de cuidados a domicilio que conecta a familias con cuidadores
+          profesionales y da continuidad a la organización de los cuidados.
+        </p>
+      </div>
+
+      <div>
+        <h4 class="footer__title">Plataforma</h4>
+        <ul class="footer__list">
+          <li><a href="#como-funciona">Cómo funciona</a></li>
+            <li><a href="#recorrido">Recorrido familiar</a></li>
+            <li><a href="#cognitivas">Rutinas cognitivas</a></li>
+          <li><a href="#usuarios">Para quién es</a></li>
+          <li><a href="#modelo">Modelo de negocio</a></li>
+          <li><a href="#diferenciacion">Diferenciación</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="footer__title">Documento</h4>
+        <ul class="footer__list">
+          <li>Concepto de negocio · v0.1</li>
+          <li>Octubre de 2026</li>
+          <li>Privacidad · Seguridad · Auditoría</li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="footer__title">Contacto</h4>
+        <ul class="footer__list">
+          <li><a href="mailto:hola@cuidapp.es">hola@cuidapp.es</a></li>
+          <li>Acceso anticipado</li>
+          <li>Privacidad · Seguridad · Auditoría</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="site-footer__bottom">
+      <div class="container">© 2026 Cuidapp · Documento maestro de concepto de negocio</div>
+    </div>
+  </footer>
+
+  <button class="back-to-top" id="back-to-top" type="button" aria-label="Volver arriba">
+    <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"></use></svg>
+  </button>
+
+  <script src="js/cognitive-games.js?v=20261024" defer></script>
+  <script src="js/main.js?v=20261018" defer></script>
+</body>
+</html>
